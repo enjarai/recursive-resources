@@ -1,36 +1,30 @@
 package nl.enjarai.recursiveresources.mixin;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.OptionsScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.screen.pack.PackScreen;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.text.Text;
 import nl.enjarai.recursiveresources.gui.CustomResourcePackScreen;
 import nl.enjarai.shared_resources.api.DefaultGameResources;
 import nl.enjarai.shared_resources.api.GameResourceHelper;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Consumer;
 
 @Mixin(OptionsScreen.class)
 public abstract class OptionsScreenMixin {
-    @Shadow
-    protected abstract void refreshResourcePacks(ResourcePackManager resourcePackManager);
 
-    /**
-     * @author recursiveresources
-     * @reason Replace the resource packs screen with a custom one.
-     */
-    @Overwrite
-    private void method_19824(ButtonWidget button) {
-        var client = MinecraftClient.getInstance();
+    @Redirect(method = "method_19824", at = @At(value = "NEW", target = "Lnet/minecraft/client/gui/screen/pack/PackScreen;", remap = true), remap = false)
+    private PackScreen replacePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File resourcePackDir, Text title) {
         var packRoots = new ArrayList<Path>();
-        packRoots.add(client.getResourcePackDir().toPath());
+        packRoots.add(resourcePackDir.toPath());
 
         if (FabricLoader.getInstance().isModLoaded("shared-resources")) {
             var directory = GameResourceHelper.getPathFor(DefaultGameResources.RESOURCEPACKS);
@@ -39,12 +33,6 @@ public abstract class OptionsScreenMixin {
                 packRoots.add(directory);
             }
         }
-
-        client.setScreen(new CustomResourcePackScreen(
-                (OptionsScreen) (Object) this, client.getResourcePackManager(),
-                this::refreshResourcePacks, client.getResourcePackDir(),
-                Text.translatable("resourcePack.title"),
-                packRoots
-        ));
+        return new CustomResourcePackScreen(parent, packManager, applier, resourcePackDir, title, packRoots);
     }
 }

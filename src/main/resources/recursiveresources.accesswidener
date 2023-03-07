@@ -1,8 +1,6 @@
 accessWidener   v1  named
 
 # Required for the fancy screen
-accessible  field    net/minecraft/client/gui/screen/pack/PackScreen    parent    Lnet/minecraft/client/gui/screen/Screen;
-
 accessible  field    net/minecraft/client/gui/screen/pack/PackScreen    availablePackList    Lnet/minecraft/client/gui/screen/pack/PackListWidget;
 mutable     field    net/minecraft/client/gui/screen/pack/PackScreen    availablePackList    Lnet/minecraft/client/gui/screen/pack/PackListWidget;
 

@@ -1,1 +1,2 @@
-- The default folder texture can now be changed with resource packs
+- Updated to 1.19.4.
+- Removed unnecessary "Found non-pack entry, ignoring" log spam.

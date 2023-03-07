@@ -42,8 +42,8 @@ public class CustomResourcePackScreen extends PackScreen {
     private boolean folderView = true;
     public final List<Path> roots;
 
-    public CustomResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
-        super(parent, packManager, applier, mainRoot.toPath(), title);
+    public CustomResourcePackScreen(ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
+        super(packManager, applier, mainRoot.toPath(), title);
         this.roots = roots;
     }
 

@@ -40,7 +40,7 @@ public abstract class OptionsScreenMixin {
         }
 
         return new CustomResourcePackScreen(
-                (OptionsScreen) (Object) this, client.getResourcePackManager(),
+                client.getResourcePackManager(),
                 this::refreshResourcePacks, client.getResourcePackDir().toFile(),
                 Text.translatable("resourcePack.title"),
                 packRoots

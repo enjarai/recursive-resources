@@ -21,6 +21,10 @@
   "environment": "client",
   "entrypoints": {
     "client": [
+      "nl.enjarai.recursiveresources.RecursiveResources"
+    ],
+    "cicada": [
+      "nl.enjarai.recursiveresources.RecursiveResources"
     ]
   },
   "mixins": [

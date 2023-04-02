@@ -29,6 +29,13 @@ import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.wrap;
 public class CustomResourcePackScreen extends PackScreen {
     private static final File ROOT_FOLDER = new File("");
 
+    private static final Text OPEN_PACK_FOLDER = Text.translatable("pack.openFolder");
+    private static final Text DONE = Text.translatable("gui.done");
+    private static final Text SORT_AZ = Text.translatable("recursiveresources.sort.a-z");
+    private static final Text SORT_ZA = Text.translatable("recursiveresources.sort.z-a");
+    private static final Text VIEW_FOLDER = Text.translatable("recursiveresources.view.folder");
+    private static final Text VIEW_FLAT = Text.translatable("recursiveresources.view.flat");
+
     private final MinecraftClient client = MinecraftClient.getInstance();
 
     private final ResourcePackListProcessor listProcessor = new ResourcePackListProcessor(this::refresh);
@@ -53,21 +60,18 @@ public class CustomResourcePackScreen extends PackScreen {
     protected void init() {
         super.init();
 
-        var openFolderText = Text.translatable("pack.openFolder");
-        var doneText = Text.translatable("gui.done");
-
-        findButton(openFolderText).ifPresent(btn -> {
+        findButton(OPEN_PACK_FOLDER).ifPresent(btn -> {
             btn.setX(width / 2 + 25);
             btn.setY(height - 48);
         });
 
-        findButton(doneText).ifPresent(btn -> {
+        findButton(DONE).ifPresent(btn -> {
             btn.setX(width / 2 + 25);
             btn.setY(height - 26);
         });
 
         addDrawableChild(
-                ButtonWidget.builder(Text.of("A-Z"), btn -> {
+                ButtonWidget.builder(SORT_AZ, btn -> {
                     listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortAZ);
                 })
                 .dimensions(width / 2 - 179, height - 26, 30, 20)
@@ -75,7 +79,7 @@ public class CustomResourcePackScreen extends PackScreen {
         );
 
         addDrawableChild(
-                ButtonWidget.builder(Text.of("Z-A"), btn -> {
+                ButtonWidget.builder(SORT_ZA, btn -> {
                     listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortZA);
                 })
                 .dimensions(width / 2 - 179 + 34, height - 26, 30, 20)
@@ -83,9 +87,9 @@ public class CustomResourcePackScreen extends PackScreen {
         );
 
         addDrawableChild(
-                ButtonWidget.builder(Text.of(folderView ? "Folder View" : "Flat View"), btn -> {
+                ButtonWidget.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
                     folderView = !folderView;
-                    btn.setMessage(Text.of(folderView ? "Folder View" : "Flat View"));
+                    btn.setMessage(folderView ? VIEW_FOLDER : VIEW_FLAT);
 
                     refresh();
                     customAvailablePacks.setScrollAmount(0.0);

@@ -1,2 +1,0 @@
-- Updated to 1.19.4.
-- Removed unnecessary "Found non-pack entry, ignoring" log spam.

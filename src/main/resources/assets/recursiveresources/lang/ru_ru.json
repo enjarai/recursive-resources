@@ -5,12 +5,15 @@
       "z-a": "Я-А"
     },
     "view": {
-      "folder": "Просмотр папок",
-      "flat": "Плоский вид"
+      "folder": "Папки",
+      "flat": "Все"
     },
     "folder": {
-      "back": "(Назад)",
-      "folder": "(Папка)"
+      "back": "§oНазад",
+      "folder": "§oПапка"
     }
-  }
+  },
+  "modmenu.nameTranslation.recursiveresources": "Рекурсивные ресурсы",
+  "modmenu.summaryTranslation.recursiveresources": "Улучшенное меню наборов ресурсов с поддержкой папок.",
+  "modmenu.descriptionTranslation.recursiveresources": "Улучшенный вид меню наборов ресурсов с возможностью их сортировки, поиска по имени и описанию, а также поддержкой чтения из папок для лучшей организации пространства."
 }

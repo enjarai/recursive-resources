@@ -9,8 +9,8 @@
       "flat": "Все"
     },
     "folder": {
-      "back": "§oНазад",
-      "folder": "§oПапка"
+      "back": "(Назад)",
+      "folder": "(Папка)"
     }
   },
   "modmenu.nameTranslation.recursiveresources": "Рекурсивные ресурсы",

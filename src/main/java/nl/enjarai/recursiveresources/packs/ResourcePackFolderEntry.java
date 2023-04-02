@@ -43,7 +43,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     }
 
     public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder, boolean isUp) {
-        super(client, list,
+        super(client, list, ownerScreen,
                 new FolderPack(
                         Text.of(isUp ? UP_TEXT : folder.getName()),
                         isUp ? BACK_DESCRIPTION : FOLDER_DESCRIPTION,

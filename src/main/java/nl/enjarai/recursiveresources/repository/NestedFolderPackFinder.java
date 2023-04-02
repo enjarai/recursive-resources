@@ -45,7 +45,7 @@ public class NestedFolderPackFinder implements ResourcePackProvider {
         }
     }
 
-    public void addPack(File fileOrFolder, Consumer<ResourcePackProfile> profileAdder) {
+    public void addPack(File fileOrFolder, Consumer<ResourcePackProfile> profileAdder, Factory factory) {
         String displayName = fileOrFolder.getName();
         String name = "file/" + StringUtils.removeStart(
                 fileOrFolder.getAbsolutePath().substring(rootLength).replace('\\', '/'), "/");

@@ -71,11 +71,6 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
     }
 
     @Override
-    public String getName() {
-        return displayName.getString();
-    }
-
-    @Override
     public Text getDisplayName() {
         return displayName;
     }

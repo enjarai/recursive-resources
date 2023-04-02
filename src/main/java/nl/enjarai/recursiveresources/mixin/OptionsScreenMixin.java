@@ -2,6 +2,7 @@ package nl.enjarai.recursiveresources.mixin;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.OptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.resource.ResourcePackManager;
@@ -41,7 +42,7 @@ public abstract class OptionsScreenMixin {
         }
 
         client.setScreen(new CustomResourcePackScreen(
-                client.getResourcePackManager(),
+                (Screen) (Object) this, client.getResourcePackManager(),
                 this::refreshResourcePacks, client.getResourcePackDir(),
                 Text.translatable("resourcePack.title"),
                 packRoots

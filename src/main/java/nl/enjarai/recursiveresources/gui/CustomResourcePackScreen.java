@@ -1,7 +1,6 @@
 package nl.enjarai.recursiveresources.gui;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
 import net.minecraft.client.gui.screen.pack.PackScreen;

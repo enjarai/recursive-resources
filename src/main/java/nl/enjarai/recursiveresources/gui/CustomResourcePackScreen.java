@@ -1,7 +1,6 @@
 package nl.enjarai.recursiveresources.gui;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
 import net.minecraft.client.gui.screen.pack.PackScreen;
@@ -29,6 +28,13 @@ import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.wrap;
 public class CustomResourcePackScreen extends PackScreen {
     private static final File ROOT_FOLDER = new File("");
 
+    private static final Text OPEN_PACK_FOLDER = Text.translatable("pack.openFolder");
+    private static final Text DONE = Text.translatable("gui.done");
+    private static final Text SORT_AZ = Text.translatable("recursiveresources.sort.a-z");
+    private static final Text SORT_ZA = Text.translatable("recursiveresources.sort.z-a");
+    private static final Text VIEW_FOLDER = Text.translatable("recursiveresources.view.folder");
+    private static final Text VIEW_FLAT = Text.translatable("recursiveresources.view.flat");
+
     private final MinecraftClient client = MinecraftClient.getInstance();
 
     private final ResourcePackListProcessor listProcessor = new ResourcePackListProcessor(this::refresh);
@@ -42,8 +48,8 @@ public class CustomResourcePackScreen extends PackScreen {
     private boolean folderView = true;
     public final List<Path> roots;
 
-    public CustomResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
-        super(parent, packManager, applier, mainRoot, title);
+    public CustomResourcePackScreen(ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
+        super(packManager, applier, mainRoot, title);
         this.roots = roots;
     }
 
@@ -54,30 +60,27 @@ public class CustomResourcePackScreen extends PackScreen {
         client.keyboard.setRepeatEvents(true);
         super.init();
 
-        var openFolderText = Text.translatable("pack.openFolder");
-        var doneText = Text.translatable("gui.done");
-
-        findButton(openFolderText).ifPresent(btn -> {
+        findButton(OPEN_PACK_FOLDER).ifPresent(btn -> {
             btn.x = width / 2 + 25;
             btn.y = height - 48;
         });
 
-        findButton(doneText).ifPresent(btn -> {
+        findButton(DONE).ifPresent(btn -> {
             btn.x = width / 2 + 25;
             btn.y = height - 26;
         });
 
-        addDrawableChild(new ButtonWidget(width / 2 - 179, height - 26, 30, 20, Text.of("A-Z"), btn -> {
+        addDrawableChild(new ButtonWidget(width / 2 - 179, height - 26, 30, 20, SORT_AZ, btn -> {
             listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortAZ);
         }));
 
-        addDrawableChild(new ButtonWidget(width / 2 - 179 + 34, height - 26, 30, 20, Text.of("Z-A"), btn -> {
+        addDrawableChild(new ButtonWidget(width / 2 - 179 + 34, height - 26, 30, 20, SORT_ZA, btn -> {
             listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortZA);
         }));
 
-        addDrawableChild(new ButtonWidget(width / 2 - 179 + 68, height - 26, 86, 20, Text.of(folderView ? "Folder View" : "Flat View"), btn -> {
+        addDrawableChild(new ButtonWidget(width / 2 - 179 + 68, height - 26, 86, 20, folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
             folderView = !folderView;
-            btn.setMessage(Text.of(folderView ? "Folder View" : "Flat View"));
+            btn.setMessage(folderView ? VIEW_FOLDER : VIEW_FLAT);
 
             refresh();
             customAvailablePacks.setScrollAmount(0.0);

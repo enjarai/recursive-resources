@@ -1,1 +1,0 @@
-- The default folder texture can now be changed with resource packs

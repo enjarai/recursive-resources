@@ -1,0 +1,84 @@
+{
+  "mod_id": "recursiveresources",
+
+  "conversations": {
+    "cicada:greetings": {
+      "lines": [
+        {
+          "order": 15,
+          "text": "Hallo, I'm here!"
+        },
+        {
+          "condition": {
+            "type": "cicada:all",
+            "conditions": [
+              {
+                "type": "cicada:mod_loaded",
+                "mod_id": "do_a_barrel_roll"
+              },
+              {
+                "type": "cicada:mod_participates",
+                "mod_id": "showmeyourskin"
+              }
+            ]
+          },
+          "order": 23,
+          "text": "Yea, what do you care?"
+        }
+      ]
+    },
+    "cicada:good_old_days": {
+      "lines": [
+        {
+          "order": 25,
+          "text": "We're doing that right now."
+        }
+      ]
+    },
+
+    "recursiveresources:fork": {
+      "priority": {
+        "priority": 20
+      },
+      "lines": [
+        {
+          "order": 0,
+          "text": "This mod is a fork of the now abandoned mod called Resource Pack Organizer, originally made by chylex."
+        },
+        {
+          "condition": {
+            "type": "cicada:mod_participates",
+            "mod_id": "showmeyourskin"
+          },
+          "order": 20,
+          "text": "Don't worry, it's also listed in the mod description."
+        }
+      ]
+    },
+    "showmeyourskin:plagiarism": {
+      "lines": [
+        {
+          "order": 50,
+          "text": "Do we have an army?"
+        }
+      ]
+    },
+
+    "cicada:christmas": {
+      "lines": [
+        {
+          "order": 40,
+          "text": "Truly the best time of the year."
+        }
+      ]
+    },
+    "cicada:new_year": {
+      "lines": [
+        {
+          "order": 20,
+          "text": "\uD83C\uDF86 Happy new year everyone! Lets make it a good one this time. \uD83C\uDF86"
+        }
+      ]
+    }
+  }
+}

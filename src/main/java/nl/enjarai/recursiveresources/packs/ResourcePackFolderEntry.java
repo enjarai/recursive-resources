@@ -22,6 +22,9 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     public static final Identifier WIDGETS_TEXTURE = RecursiveResources.id("textures/gui/widgets.png");
     public static final String UP_TEXT = "..";
 
+    private static final Text BACK_DESCRIPTION = Text.translatable("recursiveresources.folder.back");
+    private static final Text FOLDER_DESCRIPTION = Text.translatable("recursiveresources.folder.folder");
+
     private final CustomResourcePackScreen ownerScreen;
     public final File folder;
     public final boolean isUp;
@@ -40,10 +43,10 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     }
 
     public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder, boolean isUp) {
-        super(client, list, ownerScreen,
+        super(client, list,
                 new FolderPack(
                         Text.of(isUp ? UP_TEXT : folder.getName()),
-                        Text.of(isUp ? "(Back)" : "(Folder)"),
+                        isUp ? BACK_DESCRIPTION : FOLDER_DESCRIPTION,
                         findIconFile(ownerScreen.roots, folder),
                         folder
                 )

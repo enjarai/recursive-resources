@@ -21,6 +21,10 @@
   "environment": "client",
   "entrypoints": {
     "client": [
+      "nl.enjarai.recursiveresources.RecursiveResources"
+    ],
+    "cicada": [
+      "nl.enjarai.recursiveresources.RecursiveResources"
     ]
   },
   "mixins": [
@@ -29,7 +33,8 @@
   "accessWidener": "recursiveresources.accesswidener",
 
   "depends": {
-    "minecraft": ">=1.19 <1.19.3-"
+    "minecraft": ">=1.19 <1.19.3-",
+    "fabric-api": "*"
   },
 
   "custom": {

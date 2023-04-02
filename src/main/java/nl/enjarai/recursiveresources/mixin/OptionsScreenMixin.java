@@ -41,7 +41,7 @@ public abstract class OptionsScreenMixin {
         }
 
         client.setScreen(new CustomResourcePackScreen(
-                (OptionsScreen) (Object) this, client.getResourcePackManager(),
+                client.getResourcePackManager(),
                 this::refreshResourcePacks, client.getResourcePackDir(),
                 Text.translatable("resourcePack.title"),
                 packRoots

@@ -1,18 +1,19 @@
-package nl.enjarai.recursiveresources.repository;
+package nl.enjarai.recursiveresources.pack;
 
 import net.minecraft.resource.*;
 import net.minecraft.resource.ResourcePackProfile.InsertionPosition;
 import net.minecraft.text.Text;
+import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.function.Consumer;
 
-public class NestedFolderPackFinder implements ResourcePackProvider {
+public class NestedFolderPackProvider implements ResourcePackProvider {
     protected File root;
     protected int rootLength;
 
-    public NestedFolderPackFinder(File root) {
+    public NestedFolderPackProvider(File root) {
         this.root = root;
         this.rootLength = root.getAbsolutePath().length();
     }

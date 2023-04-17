@@ -1,4 +1,4 @@
-package nl.enjarai.recursiveresources.repository;
+package nl.enjarai.recursiveresources.util;
 
 import net.minecraft.resource.DirectoryResourcePack;
 import net.minecraft.resource.ResourcePack;

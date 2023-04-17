@@ -1,4 +1,4 @@
-package nl.enjarai.recursiveresources.packs;
+package nl.enjarai.recursiveresources.pack;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;

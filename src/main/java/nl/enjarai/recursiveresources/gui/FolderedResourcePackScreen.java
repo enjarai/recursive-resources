@@ -10,9 +10,8 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.text.Text;
-import nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry;
-import nl.enjarai.recursiveresources.packs.ResourcePackListProcessor;
-import nl.enjarai.recursiveresources.repository.ResourcePackUtils;
+import nl.enjarai.recursiveresources.util.ResourcePackListProcessor;
+import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -22,10 +21,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry.WIDGETS_TEXTURE;
-import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.wrap;
+import static nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry.WIDGETS_TEXTURE;
+import static nl.enjarai.recursiveresources.util.ResourcePackUtils.wrap;
 
-public class CustomResourcePackScreen extends PackScreen {
+public class FolderedResourcePackScreen extends PackScreen {
     private static final File ROOT_FOLDER = new File("");
 
     private static final Text OPEN_PACK_FOLDER = Text.translatable("pack.openFolder");
@@ -41,14 +40,14 @@ public class CustomResourcePackScreen extends PackScreen {
     private Comparator<ResourcePackEntry> currentSorter;
 
     private PackListWidget originalAvailablePacks;
-    private PackListWidgetCustom customAvailablePacks;
+    private FolderedPackListWidget customAvailablePacks;
     private TextFieldWidget searchField;
 
     private File currentFolder = ROOT_FOLDER;
     private boolean folderView = true;
     public final List<Path> roots;
 
-    public CustomResourcePackScreen(ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
+    public FolderedResourcePackScreen(ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
         super(packManager, applier, mainRoot.toPath(), title);
         this.roots = roots;
     }
@@ -124,7 +123,7 @@ public class CustomResourcePackScreen extends PackScreen {
         // Replacing the available pack list with our custom implementation
         originalAvailablePacks = availablePackList;
         remove(originalAvailablePacks);
-        addSelectableChild(customAvailablePacks = new PackListWidgetCustom(originalAvailablePacks, this, 200, height, width / 2 - 204));
+        addSelectableChild(customAvailablePacks = new FolderedPackListWidget(originalAvailablePacks, this, 200, height, width / 2 - 204));
         availablePackList = customAvailablePacks;
 
         listProcessor.pauseCallback();

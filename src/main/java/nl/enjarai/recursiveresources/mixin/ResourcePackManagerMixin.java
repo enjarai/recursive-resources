@@ -5,8 +5,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.DefaultClientResourcePackProvider;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.resource.ResourcePackProvider;
-import nl.enjarai.recursiveresources.compat.shared_resources.ExternalNestedFolderPackFinder;
-import nl.enjarai.recursiveresources.repository.NestedFolderPackFinder;
+import nl.enjarai.recursiveresources.compat.shared_resources.ExternalNestedFolderPackProvider;
+import nl.enjarai.recursiveresources.pack.NestedFolderPackProvider;
 import nl.enjarai.shared_resources.api.DefaultGameResources;
 import nl.enjarai.shared_resources.api.GameResourceHelper;
 import org.spongepowered.asm.mixin.Final;
@@ -38,11 +38,11 @@ public abstract class ResourcePackManagerMixin {
             var client = MinecraftClient.getInstance();
 
             providers = new HashSet<>(providers);
-            providers.add(new NestedFolderPackFinder(client.getResourcePackDir().toFile()));
+            providers.add(new NestedFolderPackProvider(client.getResourcePackDir().toFile()));
 
             // Load shared resources compat if present
             if (FabricLoader.getInstance().isModLoaded("shared-resources")) {
-                providers.add(new ExternalNestedFolderPackFinder(() -> GameResourceHelper.getPathFor(DefaultGameResources.RESOURCEPACKS)));
+                providers.add(new ExternalNestedFolderPackProvider(() -> GameResourceHelper.getPathFor(DefaultGameResources.RESOURCEPACKS)));
             }
         }
     }

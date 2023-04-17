@@ -1,4 +1,4 @@
-package nl.enjarai.recursiveresources.packs;
+package nl.enjarai.recursiveresources.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
@@ -10,13 +10,13 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import nl.enjarai.recursiveresources.RecursiveResources;
-import nl.enjarai.recursiveresources.gui.CustomResourcePackScreen;
+import nl.enjarai.recursiveresources.pack.FolderPack;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
-import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.isChildOfFolder;
+import static nl.enjarai.recursiveresources.util.ResourcePackUtils.isChildOfFolder;
 
 public class ResourcePackFolderEntry extends ResourcePackEntry {
     public static final Identifier WIDGETS_TEXTURE = RecursiveResources.id("textures/gui/widgets.png");
@@ -25,7 +25,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     private static final Text BACK_DESCRIPTION = Text.translatable("recursiveresources.folder.back");
     private static final Text FOLDER_DESCRIPTION = Text.translatable("recursiveresources.folder.folder");
 
-    private final CustomResourcePackScreen ownerScreen;
+    private final FolderedResourcePackScreen ownerScreen;
     public final File folder;
     public final boolean isUp;
     public final List<ResourcePackEntry> children;
@@ -42,7 +42,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
         return null;
     }
 
-    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder, boolean isUp) {
+    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, FolderedResourcePackScreen ownerScreen, File folder, boolean isUp) {
         super(client, list,
                 new FolderPack(
                         Text.of(isUp ? UP_TEXT : folder.getName()),
@@ -57,7 +57,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
         this.children = isUp ? List.of() : resolveChildren();
     }
 
-    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder) {
+    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, FolderedResourcePackScreen ownerScreen, File folder) {
         this(client, list, ownerScreen, folder, false);
     }
 
@@ -113,10 +113,11 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
         return widget.children().stream()
                 .filter(entry -> !(entry instanceof ResourcePackFolderEntry))
                 .filter(entry -> {
-                    var resourcePack = ((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack();
-                    return ownerScreen.roots.stream().anyMatch((root) ->
-                            isChildOfFolder(root.resolve(folder.toPath()).toFile(), resourcePack)
-                    );
+                    try (var resourcePack = ((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack()) {
+                        return ownerScreen.roots.stream().anyMatch((root) ->
+                                isChildOfFolder(root.resolve(folder.toPath()).toFile(), resourcePack)
+                        );
+                    }
                 })
                 .toList();
     }

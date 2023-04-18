@@ -29,21 +29,23 @@ public record FolderMeta(Path icon, List<Path> packs, boolean hidden) {
             var metaFile = root
                     .resolve(folder)
                     .resolve(FolderMeta.META_FILE_NAME);
+            FolderMeta meta = null;
 
             if (Files.exists(metaFile)) {
-                try (Stream<Path> packs = Files.list(metaFile.getParent())) {
-                    FolderMeta meta = FolderMeta.load(metaFile).getRefreshed(packs
-                            .filter(ResourcePackUtils::isPack)
-                            .map(Path::normalize)
-                            .map(root::relativize)
-                            .toList()
-                    );
-                    meta.save(metaFile);
+                meta = FolderMeta.load(metaFile);
+            }
+            if (meta == null) meta = FolderMeta.DEFAULT;
 
-                    return meta;
-                } catch (Exception e) {
-                    RecursiveResources.LOGGER.error("Failed to process meta file for folder " + folder, e);
-                }
+            try (Stream<Path> packs = Files.list(metaFile.getParent())) {
+                meta = meta.getRefreshed(packs
+                        .filter(ResourcePackUtils::isPack)
+                        .map(Path::normalize)
+                        .map(root::relativize)
+                        .toList()
+                );
+                meta.save(metaFile);
+            } catch (Exception e) {
+                RecursiveResources.LOGGER.error("Failed to process meta file for folder " + folder, e);
             }
         }
         return FolderMeta.DEFAULT;

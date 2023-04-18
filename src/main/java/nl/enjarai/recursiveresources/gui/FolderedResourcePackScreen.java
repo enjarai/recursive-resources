@@ -10,10 +10,15 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.text.Text;
+import nl.enjarai.recursiveresources.RecursiveResources;
+import nl.enjarai.recursiveresources.pack.FolderMeta;
+import nl.enjarai.recursiveresources.pack.FolderPack;
 import nl.enjarai.recursiveresources.util.ResourcePackListProcessor;
 import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,10 +27,11 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import static nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry.WIDGETS_TEXTURE;
+import static nl.enjarai.recursiveresources.util.ResourcePackUtils.isFolderButNotFolderBasedPack;
 import static nl.enjarai.recursiveresources.util.ResourcePackUtils.wrap;
 
 public class FolderedResourcePackScreen extends PackScreen {
-    private static final File ROOT_FOLDER = new File("");
+    private static final Path ROOT_FOLDER = Path.of("");
 
     private static final Text OPEN_PACK_FOLDER = Text.translatable("pack.openFolder");
     private static final Text DONE = Text.translatable("gui.done");
@@ -43,13 +49,26 @@ public class FolderedResourcePackScreen extends PackScreen {
     private FolderedPackListWidget customAvailablePacks;
     private TextFieldWidget searchField;
 
-    private File currentFolder = ROOT_FOLDER;
+    private Path currentFolder = ROOT_FOLDER;
+    private FolderMeta currentFolderMeta;
     private boolean folderView = true;
     public final List<Path> roots;
 
     public FolderedResourcePackScreen(ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
         super(packManager, applier, mainRoot.toPath(), title);
         this.roots = roots;
+        this.currentFolderMeta = FolderMeta.loadMetaFile(roots, currentFolder);
+        this.currentSorter = (pack1, pack2) -> {
+            var packs = currentFolderMeta.packs();
+
+            var pack1Index = packs.indexOf(Path.of(pack1.pack.getName()));
+            var pack2Index = packs.indexOf(Path.of(pack2.pack.getName()));
+
+            if (pack1Index == -1) pack1Index = Integer.MAX_VALUE;
+            if (pack2Index == -1) pack2Index = Integer.MAX_VALUE;
+
+            return Integer.compare(pack1Index, pack2Index);
+        };
     }
 
     // Components
@@ -68,21 +87,21 @@ public class FolderedResourcePackScreen extends PackScreen {
             btn.setY(height - 26);
         });
 
-        addDrawableChild(
-                ButtonWidget.builder(SORT_AZ, btn -> {
-                    listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortAZ);
-                })
-                .dimensions(width / 2 - 179, height - 26, 30, 20)
-                .build()
-        );
-
-        addDrawableChild(
-                ButtonWidget.builder(SORT_ZA, btn -> {
-                    listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortZA);
-                })
-                .dimensions(width / 2 - 179 + 34, height - 26, 30, 20)
-                .build()
-        );
+//        addDrawableChild(
+//                ButtonWidget.builder(SORT_AZ, btn -> {
+//                    listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortAZ);
+//                })
+//                .dimensions(width / 2 - 179, height - 26, 30, 20)
+//                .build()
+//        );
+//
+//        addDrawableChild(
+//                ButtonWidget.builder(SORT_ZA, btn -> {
+//                    listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortZA);
+//                })
+//                .dimensions(width / 2 - 179 + 34, height - 26, 30, 20)
+//                .build()
+//        );
 
         addDrawableChild(
                 ButtonWidget.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
@@ -150,8 +169,8 @@ public class FolderedResourcePackScreen extends PackScreen {
 
     // Processing
 
-    private File getParentFileSafe(File file) {
-        var parent = file.getParentFile();
+    private Path getParentFileSafe(Path file) {
+        var parent = file.getParent();
         return parent == null ? ROOT_FOLDER : parent;
     }
 
@@ -174,18 +193,26 @@ public class FolderedResourcePackScreen extends PackScreen {
             // create entries for all the folders that aren't packs
             var createdFolders = new ArrayList<Path>();
             for (Path root : roots) {
-                var absolute = root.resolve(currentFolder.toPath());
+                var absolute = root.resolve(currentFolder);
 
-                for (File folder : wrap(absolute.toFile().listFiles(ResourcePackUtils::isFolderButNotFolderBasedPack))) {
-                    var relative = root.relativize(folder.toPath().normalize());
+                try (var contents = Files.list(absolute)) {
+                    for (Path folder : contents.filter(ResourcePackUtils::isFolderButNotFolderBasedPack).toList()) {
+                        var relative = root.relativize(folder.normalize());
 
-                    if (createdFolders.contains(relative)) {
-                        continue;
+                        if (createdFolders.contains(relative)) {
+                            continue;
+                        }
+
+                        var entry = new ResourcePackFolderEntry(client, customAvailablePacks,
+                                this, relative);
+
+                        if (((FolderPack) entry.pack).isVisible()) {
+                            folders.add(entry);
+                        }
+                        createdFolders.add(relative);
                     }
-
-                    folders.add(new ResourcePackFolderEntry(client, customAvailablePacks,
-                            this, relative.toFile()));
-                    createdFolders.add(relative);
+                } catch (IOException e) {
+                    RecursiveResources.LOGGER.error("Failed to read contents of " + absolute, e);
                 }
             }
         }
@@ -201,10 +228,10 @@ public class FolderedResourcePackScreen extends PackScreen {
                 }
 
                 // if it's a pack, get the folder it's in and check that against all our roots
-                File file = ResourcePackUtils.determinePackFolder(((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack());
+                var file = ResourcePackUtils.determinePackFolder(((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack());
                 return file == null ? !notInRoot() : roots.stream().anyMatch((root) -> {
-                    var absolute = root.resolve(currentFolder.toPath());
-                    return absolute.toFile().equals(getParentFileSafe(file));
+                    var absolute = root.resolve(currentFolder);
+                    return absolute.equals(getParentFileSafe(file));
                 });
             }).toList();
 
@@ -215,8 +242,9 @@ public class FolderedResourcePackScreen extends PackScreen {
         customAvailablePacks.setScrollAmount(customAvailablePacks.getScrollAmount());
     }
 
-    public void moveToFolder(File folder) {
+    public void moveToFolder(Path folder) {
         currentFolder = folder;
+        currentFolderMeta = FolderMeta.loadMetaFile(roots, currentFolder);
         refresh();
         customAvailablePacks.setScrollAmount(0.0);
     }

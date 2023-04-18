@@ -5,6 +5,8 @@ import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ZipResourcePack;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class ResourcePackUtils {
     private static final File[] EMPTY_FILE_ARRAY = new File[0];
@@ -17,22 +19,34 @@ public class ResourcePackUtils {
         return new File(folder, "pack.mcmeta").exists();
     }
 
+    public static boolean isFolderBasedPack(Path folder) {
+        return Files.exists(folder.resolve("pack.mcmeta"));
+    }
+
     public static boolean isFolderButNotFolderBasedPack(File folder) {
         return folder.isDirectory() && !isFolderBasedPack(folder);
     }
 
-    public static File determinePackFolder(ResourcePack pack) {
+    public static boolean isFolderButNotFolderBasedPack(Path folder) {
+        return Files.isDirectory(folder) && !isFolderBasedPack(folder);
+    }
+
+    public static boolean isPack(Path fileOrFolder) {
+        return Files.isDirectory(fileOrFolder) ? isFolderBasedPack(fileOrFolder) : fileOrFolder.toString().endsWith(".zip");
+    }
+
+    public static Path determinePackFolder(ResourcePack pack) {
         if (pack instanceof DirectoryResourcePack directoryResourcePack) {
-            return directoryResourcePack.root.toFile();
+            return directoryResourcePack.root;
         } else if (pack instanceof ZipResourcePack zipResourcePack) {
-            return zipResourcePack.backingZipFile;
+            return zipResourcePack.backingZipFile.toPath();
         } else {
             return null;
         }
     }
 
-    public static boolean isChildOfFolder(File folder, ResourcePack pack) {
-        File packFolder = determinePackFolder(pack);
-        return packFolder != null && packFolder.getAbsolutePath().startsWith(folder.getAbsolutePath());
+    public static boolean isChildOfFolder(Path folder, ResourcePack pack) {
+        var packFolder = determinePackFolder(pack);
+        return packFolder != null && packFolder.toAbsolutePath().startsWith(folder.toAbsolutePath());
     }
 }

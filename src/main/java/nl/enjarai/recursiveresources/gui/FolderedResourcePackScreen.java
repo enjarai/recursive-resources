@@ -4,7 +4,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
 import net.minecraft.client.gui.screen.pack.PackScreen;
-import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -13,6 +12,7 @@ import net.minecraft.text.Text;
 import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.pack.FolderMeta;
 import nl.enjarai.recursiveresources.pack.FolderPack;
+import nl.enjarai.recursiveresources.pack.FolderedPackSource;
 import nl.enjarai.recursiveresources.util.ResourcePackListProcessor;
 import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 
@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 
 import static nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry.WIDGETS_TEXTURE;
 import static nl.enjarai.recursiveresources.util.ResourcePackUtils.isFolderButNotFolderBasedPack;
-import static nl.enjarai.recursiveresources.util.ResourcePackUtils.wrap;
 
 public class FolderedResourcePackScreen extends PackScreen {
     private static final Path ROOT_FOLDER = Path.of("");
@@ -58,17 +57,10 @@ public class FolderedResourcePackScreen extends PackScreen {
         super(packManager, applier, mainRoot.toPath(), title);
         this.roots = roots;
         this.currentFolderMeta = FolderMeta.loadMetaFile(roots, currentFolder);
-        this.currentSorter = (pack1, pack2) -> {
-            var packs = currentFolderMeta.packs();
-
-            var pack1Index = packs.indexOf(Path.of(pack1.pack.getName()));
-            var pack2Index = packs.indexOf(Path.of(pack2.pack.getName()));
-
-            if (pack1Index == -1) pack1Index = Integer.MAX_VALUE;
-            if (pack2Index == -1) pack2Index = Integer.MAX_VALUE;
-
-            return Integer.compare(pack1Index, pack2Index);
-        };
+        this.currentSorter = (pack1, pack2) -> Integer.compare(
+                currentFolderMeta.sortEntry(pack1, currentFolder),
+                currentFolderMeta.sortEntry(pack2, currentFolder)
+        );
     }
 
     // Components
@@ -227,12 +219,8 @@ public class FolderedResourcePackScreen extends PackScreen {
                     return folder.isUp || currentFolder.equals(getParentFileSafe(folder.folder));
                 }
 
-                // if it's a pack, get the folder it's in and check that against all our roots
-                var file = ResourcePackUtils.determinePackFolder(((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack());
-                return file == null ? !notInRoot() : roots.stream().anyMatch((root) -> {
-                    var absolute = root.resolve(currentFolder);
-                    return absolute.equals(getParentFileSafe(file));
-                });
+                // if it's a pack, we can use the foldermeta to check if it should be shown
+                return currentFolderMeta.shouldShowEntry(entry, currentFolder);
             }).toList();
 
             customAvailablePacks.children().clear();

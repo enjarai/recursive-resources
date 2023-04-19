@@ -7,6 +7,7 @@ import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public class NestedFolderPackProvider implements ResourcePackProvider {
@@ -51,18 +52,21 @@ public class NestedFolderPackProvider implements ResourcePackProvider {
         String name = "file/" + StringUtils.removeStart(
                 fileOrFolder.getAbsolutePath().substring(rootLength).replace('\\', '/'), "/");
         ResourcePackProfile info;
+        Path rootPath = root.toPath();
+        Path filePath = rootPath.relativize(fileOrFolder.toPath());
+        FolderedPackSource packSource = new FolderedPackSource(rootPath, filePath);
 
         if (fileOrFolder.isDirectory()) {
             info = ResourcePackProfile.create(
                     name, Text.literal(displayName), false,
                     (packName) -> new DirectoryResourcePack(packName, fileOrFolder.toPath(), true),
-                    ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, ResourcePackSource.NONE
+                    ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, packSource
             );
         } else {
             info = ResourcePackProfile.create(
                     name, Text.literal(displayName), false,
                     (packName) -> new ZipResourcePack(packName, fileOrFolder, true),
-                    ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, ResourcePackSource.NONE
+                    ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, packSource
             );
         }
 

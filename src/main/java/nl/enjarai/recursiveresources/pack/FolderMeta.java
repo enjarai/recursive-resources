@@ -34,18 +34,21 @@ public record FolderMeta(Path icon, List<Path> packs, boolean hidden) {
 
     public static FolderMeta loadMetaFile(List<Path> roots, Path folder) {
         for (var root : roots) {
-            var metaFile = root
-                    .resolve(folder)
-                    .resolve(FolderMeta.META_FILE_NAME);
+            var rootedFolder = root.resolve(folder);
+            var metaFile = rootedFolder.resolve(FolderMeta.META_FILE_NAME);
 
-            if (Files.exists(metaFile)) {
-                FolderMeta meta = FolderMeta.load(metaFile);
+            if (Files.exists(rootedFolder) && Files.isDirectory(rootedFolder)) {
+                FolderMeta meta = FolderMeta.DEFAULT;
 
-                try (Stream<Path> packs = Files.list(metaFile.getParent())) {
+                if (Files.exists(metaFile)) {
+                    meta = FolderMeta.load(metaFile);
+                }
+
+                try (Stream<Path> packs = Files.list(rootedFolder)) {
                     meta = meta.getRefreshed(packs
                             .filter(ResourcePackUtils::isPack)
                             .map(Path::normalize)
-                            .map(metaFile.getParent()::relativize)
+                            .map(rootedFolder::relativize)
                             .toList()
                     );
                     meta.save(metaFile);
@@ -109,7 +112,7 @@ public record FolderMeta(Path icon, List<Path> packs, boolean hidden) {
         return Integer.MAX_VALUE;
     }
 
-    public boolean shouldShowEntry(PackListWidget.ResourcePackEntry entry, Path folder) {
+    public boolean containsEntry(PackListWidget.ResourcePackEntry entry, Path folder) {
         Path pack;
 
         if (entry.pack.getSource() instanceof FolderedPackSource folderedPackSource) {

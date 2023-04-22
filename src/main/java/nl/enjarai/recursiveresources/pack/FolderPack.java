@@ -12,7 +12,6 @@ import nl.enjarai.recursiveresources.RecursiveResources;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,7 +51,11 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
 
     public FolderPack(Text displayName, Text description, Function<Path, Path> iconFileResolver, Path relativeFolder, FolderMeta meta) {
         this.displayName = displayName;
-        this.description = description;
+        if (meta.description().equals("")) {
+            this.description = description;
+        } else {
+            this.description = meta.description();
+        }
         this.icon = loadCustomIcon(iconFileResolver.apply(meta.icon()), relativeFolder);
         this.meta = meta;
     }

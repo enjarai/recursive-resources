@@ -81,7 +81,7 @@ public class FolderedResourcePackScreen extends PackScreen {
             btn.y = height - 26;
         });
 
-        addDrawableChild(new ButtonWidget(width / 2 - 179 + 68, height - 26, 86, 20, folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
+        addDrawableChild(new ButtonWidget(width / 2 - 179, height - 26, 154, 20, folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
             folderView = !folderView;
             btn.setMessage(folderView ? VIEW_FOLDER : VIEW_FLAT);
 

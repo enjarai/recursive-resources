@@ -119,8 +119,8 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
 
         if (entry.pack.getSource() instanceof FolderedPackSource folderedPackSource) {
             pack = folderedPackSource.file();
-        } else if (entry.pack.getSource() == ResourcePackSource.BUILTIN) {
-            pack = EMPTY_PATH.resolve(entry.getName());
+        } else if (entry.pack.getSource() == ResourcePackSource.PACK_SOURCE_BUILTIN) {
+            pack = EMPTY_PATH.resolve(entry.pack.getDisplayName().getString());
 
             if (folder.equals(EMPTY_PATH)) return true;
         } else {

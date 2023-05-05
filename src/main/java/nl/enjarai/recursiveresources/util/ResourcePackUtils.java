@@ -1,5 +1,8 @@
 package nl.enjarai.recursiveresources.util;
 
+import net.minecraft.client.resource.Format3ResourcePack;
+import net.minecraft.client.resource.Format4ResourcePack;
+import net.minecraft.resource.AbstractFileResourcePack;
 import net.minecraft.resource.DirectoryResourcePack;
 import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ZipResourcePack;
@@ -36,10 +39,14 @@ public class ResourcePackUtils {
     }
 
     public static Path determinePackFolder(ResourcePack pack) {
-        if (pack instanceof DirectoryResourcePack directoryResourcePack) {
-            return directoryResourcePack.root;
-        } else if (pack instanceof ZipResourcePack zipResourcePack) {
-            return zipResourcePack.backingZipFile.toPath();
+        Class<? extends ResourcePack> cls = pack.getClass();
+
+        if (cls == ZipResourcePack.class || cls == DirectoryResourcePack.class) {
+            return ((AbstractFileResourcePack) pack).base.toPath();
+        } else if (pack instanceof Format3ResourcePack compatPack) {
+            return determinePackFolder(compatPack.parent);
+        } else if (pack instanceof Format4ResourcePack compatPack) {
+            return determinePackFolder(compatPack.parent);
         } else {
             return null;
         }

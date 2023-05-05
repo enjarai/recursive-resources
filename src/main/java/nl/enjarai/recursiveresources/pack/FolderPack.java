@@ -54,7 +54,7 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
         if (meta.description().equals("")) {
             this.description = description;
         } else {
-            this.description = meta.description();
+            this.description = Text.of(meta.description());
         }
         this.icon = loadCustomIcon(iconFileResolver.apply(meta.icon()), relativeFolder);
         this.meta = meta;

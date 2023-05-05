@@ -79,22 +79,6 @@ public class FolderedResourcePackScreen extends PackScreen {
             btn.setY(height - 26);
         });
 
-//        addDrawableChild(
-//                ButtonWidget.builder(SORT_AZ, btn -> {
-//                    listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortAZ);
-//                })
-//                .dimensions(width / 2 - 179, height - 26, 30, 20)
-//                .build()
-//        );
-//
-//        addDrawableChild(
-//                ButtonWidget.builder(SORT_ZA, btn -> {
-//                    listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortZA);
-//                })
-//                .dimensions(width / 2 - 179 + 34, height - 26, 30, 20)
-//                .build()
-//        );
-
         addDrawableChild(
                 ButtonWidget.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
                     folderView = !folderView;
@@ -103,7 +87,7 @@ public class FolderedResourcePackScreen extends PackScreen {
                     refresh();
                     customAvailablePacks.setScrollAmount(0.0);
                 })
-                .dimensions(width / 2 - 179 + 68, height - 26, 86, 20)
+                .dimensions(width / 2 - 179, height - 26, 154, 20)
                 .build()
         );
 

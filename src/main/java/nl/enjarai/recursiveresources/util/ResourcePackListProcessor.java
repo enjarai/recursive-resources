@@ -1,6 +1,7 @@
-package nl.enjarai.recursiveresources.packs;
+package nl.enjarai.recursiveresources.util;
 
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
+import nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Comparator;

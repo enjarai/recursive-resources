@@ -1,21 +1,25 @@
 package nl.enjarai.recursiveresources.gui;
 
+import com.google.common.collect.Lists;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
 import net.minecraft.client.gui.screen.pack.PackScreen;
-import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.text.Text;
-import nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry;
-import nl.enjarai.recursiveresources.packs.ResourcePackListProcessor;
-import nl.enjarai.recursiveresources.repository.ResourcePackUtils;
+import nl.enjarai.recursiveresources.RecursiveResources;
+import nl.enjarai.recursiveresources.pack.FolderMeta;
+import nl.enjarai.recursiveresources.pack.FolderPack;
+import nl.enjarai.recursiveresources.util.ResourcePackListProcessor;
+import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,11 +27,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry.WIDGETS_TEXTURE;
-import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.wrap;
+import static nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry.WIDGETS_TEXTURE;
+import static nl.enjarai.recursiveresources.util.ResourcePackUtils.isFolderButNotFolderBasedPack;
 
-public class CustomResourcePackScreen extends PackScreen {
-    private static final File ROOT_FOLDER = new File("");
+public class FolderedResourcePackScreen extends PackScreen {
+    private static final Path ROOT_FOLDER = Path.of("");
 
     private static final Text OPEN_PACK_FOLDER = Text.translatable("pack.openFolder");
     private static final Text DONE = Text.translatable("gui.done");
@@ -42,16 +46,22 @@ public class CustomResourcePackScreen extends PackScreen {
     private Comparator<ResourcePackEntry> currentSorter;
 
     private PackListWidget originalAvailablePacks;
-    private PackListWidgetCustom customAvailablePacks;
+    private FolderedPackListWidget customAvailablePacks;
     private TextFieldWidget searchField;
 
-    private File currentFolder = ROOT_FOLDER;
+    private Path currentFolder = ROOT_FOLDER;
+    private FolderMeta currentFolderMeta;
     private boolean folderView = true;
     public final List<Path> roots;
 
-    public CustomResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
+    public FolderedResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
         super(parent, packManager, applier, mainRoot, title);
         this.roots = roots;
+        this.currentFolderMeta = FolderMeta.loadMetaFile(roots, currentFolder);
+        this.currentSorter = (pack1, pack2) -> Integer.compare(
+                currentFolderMeta.sortEntry(pack1, currentFolder),
+                currentFolderMeta.sortEntry(pack2, currentFolder)
+        );
     }
 
     // Components
@@ -71,14 +81,6 @@ public class CustomResourcePackScreen extends PackScreen {
             btn.y = height - 26;
         });
 
-        addDrawableChild(new ButtonWidget(width / 2 - 179, height - 26, 30, 20, SORT_AZ, btn -> {
-            listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortAZ);
-        }));
-
-        addDrawableChild(new ButtonWidget(width / 2 - 179 + 34, height - 26, 30, 20, SORT_ZA, btn -> {
-            listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortZA);
-        }));
-
         addDrawableChild(new ButtonWidget(width / 2 - 179 + 68, height - 26, 86, 20, folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
             folderView = !folderView;
             btn.setMessage(folderView ? VIEW_FOLDER : VIEW_FLAT);
@@ -89,7 +91,7 @@ public class CustomResourcePackScreen extends PackScreen {
 
         // Load all available packs button
         addDrawableChild(new SilentTexturedButtonWidget(width / 2 - 204, 0, 32, 32, 0, 0, WIDGETS_TEXTURE, btn -> {
-            for (ResourcePackEntry entry : List.copyOf(availablePackList.children())) {
+            for (ResourcePackEntry entry : Lists.reverse(List.copyOf(availablePackList.children()))) {
                 if (entry.pack.canBeEnabled()) {
                     entry.pack.enable();
                 }
@@ -114,7 +116,7 @@ public class CustomResourcePackScreen extends PackScreen {
         // Replacing the available pack list with our custom implementation
         originalAvailablePacks = availablePackList;
         remove(originalAvailablePacks);
-        addSelectableChild(customAvailablePacks = new PackListWidgetCustom(originalAvailablePacks, 200, height, width / 2 - 204));
+        addSelectableChild(customAvailablePacks = new FolderedPackListWidget(originalAvailablePacks, 200, height, width / 2 - 204));
         availablePackList = customAvailablePacks;
 
         listProcessor.pauseCallback();
@@ -141,8 +143,8 @@ public class CustomResourcePackScreen extends PackScreen {
 
     // Processing
 
-    private File getParentFileSafe(File file) {
-        var parent = file.getParentFile();
+    private Path getParentFileSafe(Path file) {
+        var parent = file.getParent();
         return parent == null ? ROOT_FOLDER : parent;
     }
 
@@ -165,18 +167,26 @@ public class CustomResourcePackScreen extends PackScreen {
             // create entries for all the folders that aren't packs
             var createdFolders = new ArrayList<Path>();
             for (Path root : roots) {
-                var absolute = root.resolve(currentFolder.toPath());
+                var absolute = root.resolve(currentFolder);
 
-                for (File folder : wrap(absolute.toFile().listFiles(ResourcePackUtils::isFolderButNotFolderBasedPack))) {
-                    var relative = root.relativize(folder.toPath().normalize());
+                try (var contents = Files.list(absolute)) {
+                    for (Path folder : contents.filter(ResourcePackUtils::isFolderButNotFolderBasedPack).toList()) {
+                        var relative = root.relativize(folder.normalize());
 
-                    if (createdFolders.contains(relative)) {
-                        continue;
+                        if (createdFolders.contains(relative)) {
+                            continue;
+                        }
+
+                        var entry = new ResourcePackFolderEntry(client, customAvailablePacks,
+                                this, relative);
+
+                        if (((FolderPack) entry.pack).isVisible()) {
+                            folders.add(entry);
+                        }
+                        createdFolders.add(relative);
                     }
-
-                    folders.add(new ResourcePackFolderEntry(client, customAvailablePacks,
-                            this, relative.toFile()));
-                    createdFolders.add(relative);
+                } catch (IOException e) {
+                    RecursiveResources.LOGGER.error("Failed to read contents of " + absolute, e);
                 }
             }
         }
@@ -191,12 +201,8 @@ public class CustomResourcePackScreen extends PackScreen {
                     return folder.isUp || currentFolder.equals(getParentFileSafe(folder.folder));
                 }
 
-                // if it's a pack, get the folder it's in and check that against all our roots
-                File file = ResourcePackUtils.determinePackFolder(((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack());
-                return file == null ? !notInRoot() : roots.stream().anyMatch((root) -> {
-                    var absolute = root.resolve(currentFolder.toPath());
-                    return absolute.toFile().equals(getParentFileSafe(file));
-                });
+                // if it's a pack, we can use the foldermeta to check if it should be shown
+                return currentFolderMeta.containsEntry(entry, currentFolder);
             }).toList();
 
             customAvailablePacks.children().clear();
@@ -206,8 +212,9 @@ public class CustomResourcePackScreen extends PackScreen {
         customAvailablePacks.setScrollAmount(customAvailablePacks.getScrollAmount());
     }
 
-    public void moveToFolder(File folder) {
+    public void moveToFolder(Path folder) {
         currentFolder = folder;
+        currentFolderMeta = FolderMeta.loadMetaFile(roots, currentFolder);
         refresh();
         customAvailablePacks.setScrollAmount(0.0);
     }

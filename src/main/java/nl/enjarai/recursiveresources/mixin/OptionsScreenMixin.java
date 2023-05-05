@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screen.option.OptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.text.Text;
-import nl.enjarai.recursiveresources.gui.CustomResourcePackScreen;
+import nl.enjarai.recursiveresources.gui.FolderedResourcePackScreen;
 import nl.enjarai.shared_resources.api.DefaultGameResources;
 import nl.enjarai.shared_resources.api.GameResourceHelper;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,7 +41,7 @@ public abstract class OptionsScreenMixin {
             }
         }
 
-        client.setScreen(new CustomResourcePackScreen(
+        client.setScreen(new FolderedResourcePackScreen(
                 (Screen) (Object) this, client.getResourcePackManager(),
                 this::refreshResourcePacks, client.getResourcePackDir(),
                 Text.translatable("resourcePack.title"),

@@ -1,4 +1,4 @@
-package nl.enjarai.recursiveresources.packs;
+package nl.enjarai.recursiveresources.pack;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
@@ -12,16 +12,18 @@ import nl.enjarai.recursiveresources.RecursiveResources;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.function.Function;
 
 public class FolderPack implements ResourcePackOrganizer.Pack {
     private static final Identifier FOLDER_TEXTURE = RecursiveResources.id("textures/gui/folder.png");
     private static final Identifier OPEN_FOLDER_TEXTURE = RecursiveResources.id("textures/gui/folder_open.png");
 
-    private static Identifier loadCustomIcon(File icon, File relativeFolder) {
-        if (icon != null && icon.exists()) {
-            try (InputStream stream = icon.toURI().toURL().openStream()) {
+    private static Identifier loadCustomIcon(Path icon, Path relativeFolder) {
+        if (icon != null && Files.exists(icon)) {
+            try (InputStream stream = Files.newInputStream(icon)) {
                 // Get the path relative to the resourcepacks directory
                 var relativePath = relativeFolder.toString();
 
@@ -43,17 +45,19 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
     private final Text description;
     @Nullable
     private Identifier icon = null;
+    private final FolderMeta meta;
 
     private boolean hovered = false;
 
-    public FolderPack(Text displayName, Text description) {
+    public FolderPack(Text displayName, Text description, Function<Path, Path> iconFileResolver, Path relativeFolder, FolderMeta meta) {
         this.displayName = displayName;
-        this.description = description;
-    }
-
-    public FolderPack(Text displayName, Text description, File folder, File relativeFolder) {
-        this(displayName, description);
-        icon = loadCustomIcon(folder, relativeFolder);
+        if (meta.description().equals("")) {
+            this.description = description;
+        } else {
+            this.description = Text.of(meta.description());
+        }
+        this.icon = loadCustomIcon(iconFileResolver.apply(meta.icon()), relativeFolder);
+        this.meta = meta;
     }
 
     public void setHovered(boolean hovered) {
@@ -128,5 +132,13 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
     @Override
     public boolean canMoveTowardEnd() {
         return false;
+    }
+
+    public FolderMeta getMeta() {
+        return meta;
+    }
+
+    public boolean isVisible() {
+        return !meta.hidden();
     }
 }

@@ -1,4 +1,4 @@
-package nl.enjarai.recursiveresources.packs;
+package nl.enjarai.recursiveresources.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
@@ -10,13 +10,16 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import nl.enjarai.recursiveresources.RecursiveResources;
-import nl.enjarai.recursiveresources.gui.CustomResourcePackScreen;
+import nl.enjarai.recursiveresources.pack.FolderMeta;
+import nl.enjarai.recursiveresources.pack.FolderPack;
 
-import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 
-import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.isChildOfFolder;
+import static nl.enjarai.recursiveresources.util.ResourcePackUtils.isChildOfFolder;
 
 public class ResourcePackFolderEntry extends ResourcePackEntry {
     public static final Identifier WIDGETS_TEXTURE = RecursiveResources.id("textures/gui/widgets.png");
@@ -25,39 +28,48 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     private static final Text BACK_DESCRIPTION = Text.translatable("recursiveresources.folder.back");
     private static final Text FOLDER_DESCRIPTION = Text.translatable("recursiveresources.folder.folder");
 
-    private final CustomResourcePackScreen ownerScreen;
-    public final File folder;
+    private final FolderedResourcePackScreen ownerScreen;
+    public final Path folder;
     public final boolean isUp;
     public final List<ResourcePackEntry> children;
+    public final FolderMeta meta;
 
-    private static File findIconFile(List<Path> roots, File folder) {
-        for (var root : roots) {
-            var iconFile = root
-                    .resolve(folder.toPath())
-                    .resolve("icon.png")
-                    .toFile();
+    private static Function<Path, Path> getIconFileResolver(List<Path> roots, Path folder) {
+        return iconPath -> {
+            if (iconPath.isAbsolute()) {
+                return iconPath;
+            } else {
+                for (var root : roots) {
+                    var iconFile = root
+                            .resolve(folder)
+                            .resolve(iconPath);
 
-            if (iconFile.exists()) return iconFile;
-        }
-        return null;
+                    if (Files.exists(iconFile)) return iconFile;
+                }
+            }
+            return null;
+        };
     }
 
-    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder, boolean isUp) {
-        super(client, list, ownerScreen,
+    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, FolderedResourcePackScreen ownerScreen, Path folder, boolean isUp) {
+        super(
+                client, list, ownerScreen,
                 new FolderPack(
-                        Text.of(isUp ? UP_TEXT : folder.getName()),
+                        Text.of(isUp ? UP_TEXT : String.valueOf(folder.getFileName())),
                         isUp ? BACK_DESCRIPTION : FOLDER_DESCRIPTION,
-                        findIconFile(ownerScreen.roots, folder),
-                        folder
+                        getIconFileResolver(ownerScreen.roots, folder),
+                        folder,
+                        FolderMeta.loadMetaFile(ownerScreen.roots, folder)
                 )
         );
         this.ownerScreen = ownerScreen;
         this.folder = folder;
         this.isUp = isUp;
+        this.meta = ((FolderPack) pack).getMeta();
         this.children = isUp ? List.of() : resolveChildren();
     }
 
-    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder) {
+    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, FolderedResourcePackScreen ownerScreen, Path folder) {
         this(client, list, ownerScreen, folder, false);
     }
 
@@ -112,12 +124,8 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     private List<ResourcePackEntry> resolveChildren() {
         return widget.children().stream()
                 .filter(entry -> !(entry instanceof ResourcePackFolderEntry))
-                .filter(entry -> {
-                    var resourcePack = ((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack();
-                    return ownerScreen.roots.stream().anyMatch((root) ->
-                            isChildOfFolder(root.resolve(folder.toPath()).toFile(), resourcePack)
-                    );
-                })
+                .filter(entry -> meta.containsEntry(entry, folder))
+                .sorted(Comparator.comparingInt(entry -> meta.sortEntry((ResourcePackEntry) entry, folder)).reversed())
                 .toList();
     }
 }

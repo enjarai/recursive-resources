@@ -1,18 +1,21 @@
-package nl.enjarai.recursiveresources.repository;
+package nl.enjarai.recursiveresources.pack;
 
 import net.minecraft.resource.*;
 import net.minecraft.resource.ResourcePackProfile.Factory;
 import net.minecraft.resource.ResourcePackProfile.InsertionPosition;
+import net.minecraft.text.Text;
+import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 
-public class NestedFolderPackFinder implements ResourcePackProvider {
+public class NestedFolderPackProvider implements ResourcePackProvider {
     protected File root;
     protected int rootLength;
 
-    public NestedFolderPackFinder(File root) {
+    public NestedFolderPackProvider(File root) {
         this.root = root;
         this.rootLength = root.getAbsolutePath().length();
     }
@@ -50,16 +53,19 @@ public class NestedFolderPackFinder implements ResourcePackProvider {
         String name = "file/" + StringUtils.removeStart(
                 fileOrFolder.getAbsolutePath().substring(rootLength).replace('\\', '/'), "/");
         ResourcePackProfile info;
+        Path rootPath = root.toPath();
+        Path filePath = rootPath.relativize(fileOrFolder.toPath());
+        FolderedPackSource packSource = new FolderedPackSource(rootPath, filePath);
 
         if (fileOrFolder.isDirectory()) {
             info = ResourcePackProfile.of(
                     name, false, () -> new DirectoryResourcePack(fileOrFolder),
-                    factory, InsertionPosition.TOP, ResourcePackSource.PACK_SOURCE_NONE
+                    factory, InsertionPosition.TOP, packSource
             );
         } else {
             info = ResourcePackProfile.of(
                     name, false, () -> new ZipResourcePack(fileOrFolder),
-                    factory, InsertionPosition.TOP, ResourcePackSource.PACK_SOURCE_NONE
+                    factory, InsertionPosition.TOP, packSource
             );
         }
 

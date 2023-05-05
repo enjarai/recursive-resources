@@ -1,16 +1,16 @@
 package nl.enjarai.recursiveresources.compat.shared_resources;
 
 import net.minecraft.resource.ResourcePackProfile;
-import nl.enjarai.recursiveresources.repository.NestedFolderPackFinder;
+import nl.enjarai.recursiveresources.pack.NestedFolderPackProvider;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class ExternalNestedFolderPackFinder extends NestedFolderPackFinder {
+public class ExternalNestedFolderPackProvider extends NestedFolderPackProvider {
     protected final Supplier<Path> pathSupplier;
 
-    public ExternalNestedFolderPackFinder(Supplier<Path> pathSupplier) {
+    public ExternalNestedFolderPackProvider(Supplier<Path> pathSupplier) {
         super(pathSupplier.get().toFile());
         this.pathSupplier = pathSupplier;
     }

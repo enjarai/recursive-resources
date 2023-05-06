@@ -125,6 +125,9 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
             if (folder.equals(EMPTY_PATH)) return true;
         } else {
             Path fsPath = ResourcePackUtils.determinePackFolder(((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack());
+
+            if (fsPath == null) return false;
+
             pack = EMPTY_PATH.resolve(fsPath.getFileName());
         }
 

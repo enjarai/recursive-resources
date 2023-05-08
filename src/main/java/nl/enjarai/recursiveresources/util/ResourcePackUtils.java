@@ -39,7 +39,6 @@ public class ResourcePackUtils {
         return Files.isDirectory(fileOrFolder) ? isFolderBasedPack(fileOrFolder) : fileOrFolder.toString().endsWith(".zip");
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     public static Path determinePackFolder(ResourcePack pack) {
         Class<? extends ResourcePack> cls = pack.getClass();
 

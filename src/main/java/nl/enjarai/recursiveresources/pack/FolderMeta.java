@@ -132,6 +132,7 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
         }
 
         Path relativePath = relativiseRelativePath(folder, pack);
-        return folder.equals(pack.getParent()) || packs().contains(relativePath);
+        Path packParent = pack.getParent() != null ? pack.getParent() : EMPTY_PATH;
+        return folder.equals(packParent) || packs().contains(relativePath);
     }
 }

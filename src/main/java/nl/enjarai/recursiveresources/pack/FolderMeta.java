@@ -8,6 +8,7 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
+import net.minecraft.resource.ResourcePackSource;
 import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry;
 import nl.enjarai.recursiveresources.util.ResourcePackUtils;
@@ -19,33 +20,37 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record FolderMeta(Path icon, List<Path> packs, boolean hidden) {
+public record FolderMeta(Path icon, String description, List<Path> packs, boolean hidden) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path DUMMY_ROOT_PATH = Path.of("/");
     private static final Path EMPTY_PATH = Path.of("");
     public static final Codec<FolderMeta> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Path::of, Path::toString).fieldOf("icon").forGetter(FolderMeta::icon),
+            Codec.STRING.fieldOf("description").forGetter(FolderMeta::description),
             Codec.STRING.xmap(Path::of, Path::toString).listOf().fieldOf("packs").forGetter(FolderMeta::packs),
             Codec.BOOL.fieldOf("hidden").forGetter(FolderMeta::hidden)
     ).apply(instance, FolderMeta::new));
 
-    public static final FolderMeta DEFAULT = new FolderMeta(Path.of("icon.png"), List.of(), false);
+    public static final FolderMeta DEFAULT = new FolderMeta(Path.of("icon.png"), "", List.of(), false);
     public static final String META_FILE_NAME = "folder.json";
 
     public static FolderMeta loadMetaFile(List<Path> roots, Path folder) {
         for (var root : roots) {
-            var metaFile = root
-                    .resolve(folder)
-                    .resolve(FolderMeta.META_FILE_NAME);
+            var rootedFolder = root.resolve(folder);
+            var metaFile = rootedFolder.resolve(FolderMeta.META_FILE_NAME);
 
-            if (Files.exists(metaFile)) {
-                FolderMeta meta = FolderMeta.load(metaFile);
+            if (Files.exists(rootedFolder) && Files.isDirectory(rootedFolder)) {
+                FolderMeta meta = FolderMeta.DEFAULT;
 
-                try (Stream<Path> packs = Files.list(metaFile.getParent())) {
+                if (Files.exists(metaFile)) {
+                    meta = FolderMeta.load(metaFile);
+                }
+
+                try (Stream<Path> packs = Files.list(rootedFolder)) {
                     meta = meta.getRefreshed(packs
                             .filter(ResourcePackUtils::isPack)
                             .map(Path::normalize)
-                            .map(metaFile.getParent()::relativize)
+                            .map(rootedFolder::relativize)
                             .toList()
                     );
                     meta.save(metaFile);
@@ -95,7 +100,7 @@ public record FolderMeta(Path icon, List<Path> packs, boolean hidden) {
             }
         }
 
-        return new FolderMeta(icon, Collections.unmodifiableList(packs), hidden);
+        return new FolderMeta(icon, description, Collections.unmodifiableList(packs), hidden);
     }
 
     public int sortEntry(PackListWidget.ResourcePackEntry entry, Path folder) {
@@ -109,13 +114,20 @@ public record FolderMeta(Path icon, List<Path> packs, boolean hidden) {
         return Integer.MAX_VALUE;
     }
 
-    public boolean shouldShowEntry(PackListWidget.ResourcePackEntry entry, Path folder) {
+    public boolean containsEntry(PackListWidget.ResourcePackEntry entry, Path folder) {
         Path pack;
 
         if (entry.pack.getSource() instanceof FolderedPackSource folderedPackSource) {
             pack = folderedPackSource.file();
+        } else if (entry.pack.getSource() == ResourcePackSource.BUILTIN) {
+            pack = EMPTY_PATH.resolve(entry.getName());
+
+            if (folder.equals(EMPTY_PATH)) return true;
         } else {
             Path fsPath = ResourcePackUtils.determinePackFolder(((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack());
+
+            if (fsPath == null) return false;
+
             pack = EMPTY_PATH.resolve(fsPath.getFileName());
         }
 

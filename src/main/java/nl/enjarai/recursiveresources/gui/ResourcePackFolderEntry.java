@@ -12,14 +12,12 @@ import net.minecraft.util.Identifier;
 import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.pack.FolderMeta;
 import nl.enjarai.recursiveresources.pack.FolderPack;
-import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static nl.enjarai.recursiveresources.util.ResourcePackUtils.isChildOfFolder;
 
@@ -34,6 +32,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     public final Path folder;
     public final boolean isUp;
     public final List<ResourcePackEntry> children;
+    public final FolderMeta meta;
 
     private static Function<Path, Path> getIconFileResolver(List<Path> roots, Path folder) {
         return iconPath -> {
@@ -66,6 +65,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
         this.ownerScreen = ownerScreen;
         this.folder = folder;
         this.isUp = isUp;
+        this.meta = ((FolderPack) pack).getMeta();
         this.children = isUp ? List.of() : resolveChildren();
     }
 
@@ -124,13 +124,8 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     private List<ResourcePackEntry> resolveChildren() {
         return widget.children().stream()
                 .filter(entry -> !(entry instanceof ResourcePackFolderEntry))
-                .filter(entry -> {
-                    try (var resourcePack = ((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack()) {
-                        return ownerScreen.roots.stream().anyMatch((root) ->
-                                isChildOfFolder(root.resolve(folder), resourcePack)
-                        );
-                    }
-                })
+                .filter(entry -> meta.containsEntry(entry, folder))
+                .sorted(Comparator.comparingInt(entry -> meta.sortEntry((ResourcePackEntry) entry, folder)).reversed())
                 .toList();
     }
 }

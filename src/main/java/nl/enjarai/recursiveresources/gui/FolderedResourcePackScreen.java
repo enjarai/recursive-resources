@@ -1,5 +1,6 @@
 package nl.enjarai.recursiveresources.gui;
 
+import com.google.common.collect.Lists;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
@@ -12,7 +13,6 @@ import net.minecraft.text.Text;
 import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.pack.FolderMeta;
 import nl.enjarai.recursiveresources.pack.FolderPack;
-import nl.enjarai.recursiveresources.pack.FolderedPackSource;
 import nl.enjarai.recursiveresources.util.ResourcePackListProcessor;
 import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 
@@ -79,22 +79,6 @@ public class FolderedResourcePackScreen extends PackScreen {
             btn.setY(height - 26);
         });
 
-//        addDrawableChild(
-//                ButtonWidget.builder(SORT_AZ, btn -> {
-//                    listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortAZ);
-//                })
-//                .dimensions(width / 2 - 179, height - 26, 30, 20)
-//                .build()
-//        );
-//
-//        addDrawableChild(
-//                ButtonWidget.builder(SORT_ZA, btn -> {
-//                    listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortZA);
-//                })
-//                .dimensions(width / 2 - 179 + 34, height - 26, 30, 20)
-//                .build()
-//        );
-
         addDrawableChild(
                 ButtonWidget.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
                     folderView = !folderView;
@@ -103,13 +87,13 @@ public class FolderedResourcePackScreen extends PackScreen {
                     refresh();
                     customAvailablePacks.setScrollAmount(0.0);
                 })
-                .dimensions(width / 2 - 179 + 68, height - 26, 86, 20)
+                .dimensions(width / 2 - 179, height - 26, 154, 20)
                 .build()
         );
 
         // Load all available packs button
         addDrawableChild(new SilentTexturedButtonWidget(width / 2 - 204, 0, 32, 32, 0, 0, WIDGETS_TEXTURE, btn -> {
-            for (ResourcePackEntry entry : List.copyOf(availablePackList.children())) {
+            for (ResourcePackEntry entry : Lists.reverse(List.copyOf(availablePackList.children()))) {
                 if (entry.pack.canBeEnabled()) {
                     entry.pack.enable();
                 }
@@ -220,7 +204,7 @@ public class FolderedResourcePackScreen extends PackScreen {
                 }
 
                 // if it's a pack, we can use the foldermeta to check if it should be shown
-                return currentFolderMeta.shouldShowEntry(entry, currentFolder);
+                return currentFolderMeta.containsEntry(entry, currentFolder);
             }).toList();
 
             customAvailablePacks.children().clear();

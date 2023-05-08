@@ -3,6 +3,7 @@ package nl.enjarai.recursiveresources.util;
 import net.minecraft.client.resource.Format3ResourcePack;
 import net.minecraft.client.resource.Format4ResourcePack;
 import net.minecraft.resource.AbstractFileResourcePack;
+import net.fabricmc.fabric.impl.resource.loader.ModNioResourcePack;
 import net.minecraft.resource.DirectoryResourcePack;
 import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ZipResourcePack;
@@ -38,6 +39,7 @@ public class ResourcePackUtils {
         return Files.isDirectory(fileOrFolder) ? isFolderBasedPack(fileOrFolder) : fileOrFolder.toString().endsWith(".zip");
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static Path determinePackFolder(ResourcePack pack) {
         Class<? extends ResourcePack> cls = pack.getClass();
 
@@ -47,6 +49,8 @@ public class ResourcePackUtils {
             return determinePackFolder(compatPack.parent);
         } else if (pack instanceof Format4ResourcePack compatPack) {
             return determinePackFolder(compatPack.parent);
+        } else if (pack instanceof ModNioResourcePack modResourcePack) {
+            return Path.of(modResourcePack.getName());
         } else {
             return null;
         }

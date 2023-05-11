@@ -33,8 +33,9 @@ with the addition of many Quality of Life features, such as:
 Most of the features in this mod revolve around folders. 
 Unlike vanilla, any subfolders you create in the `.minecraft/resourcepacks` folder will be shown ingame,
 letting you navigate in and out of them to select packs.
-Due to technical limitations, this mod **cannot create or manage folders ingame**, 
+Due to technical limitations, this mod **cannot create or manage folders or move packs ingame**, 
 this must be done via an external file browser.
+Any changes you make to the directory structure will be updated in realtime ingame.
 
 ![Folders example 1](img/folders-1.png)
 

@@ -7,6 +7,7 @@ import net.fabricmc.fabric.impl.resource.loader.ModNioResourcePack;
 import net.minecraft.resource.DirectoryResourcePack;
 import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ZipResourcePack;
+import nl.enjarai.recursiveresources.RecursiveResources;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -14,6 +15,8 @@ import java.nio.file.Path;
 
 public class ResourcePackUtils {
     private static final File[] EMPTY_FILE_ARRAY = new File[0];
+    // Catches all characters that are not allowed in a path on Windows and Linux
+    private static final String UNSAFE_PATH_REGEX = "[<>:\"/\\\\|?*]";
 
     public static File[] wrap(File[] filesOrNull) {
         return filesOrNull == null ? EMPTY_FILE_ARRAY : filesOrNull;
@@ -40,17 +43,23 @@ public class ResourcePackUtils {
     }
 
     public static Path determinePackFolder(ResourcePack pack) {
-        Class<? extends ResourcePack> cls = pack.getClass();
+        try {
+            Class<? extends ResourcePack> cls = pack.getClass();
 
-        if (cls == ZipResourcePack.class || cls == DirectoryResourcePack.class) {
-            return ((AbstractFileResourcePack) pack).base.toPath();
-        } else if (pack instanceof Format3ResourcePack compatPack) {
-            return determinePackFolder(compatPack.parent);
-        } else if (pack instanceof Format4ResourcePack compatPack) {
-            return determinePackFolder(compatPack.parent);
-        } else if (pack instanceof ModNioResourcePack modResourcePack) {
-            return Path.of(modResourcePack.getName());
-        } else {
+            if (cls == ZipResourcePack.class || cls == DirectoryResourcePack.class) {
+                return ((AbstractFileResourcePack) pack).base.toPath();
+            } else if (pack instanceof Format3ResourcePack compatPack) {
+                return determinePackFolder(compatPack.parent);
+            } else if (pack instanceof Format4ResourcePack compatPack) {
+                return determinePackFolder(compatPack.parent);
+            } else if (pack instanceof ModNioResourcePack modResourcePack) {
+                return Path.of(modResourcePack.getName().replaceAll(UNSAFE_PATH_REGEX, "_"));
+            } else {
+                RecursiveResources.LOGGER.warn("Failed to determine source folder for pack: " + pack.getName() + ", unknown pack type: " + pack.getClass().getName());
+                return null;
+            }
+        } catch (Exception e) {
+            RecursiveResources.LOGGER.error("Error determining source folder for pack: " + pack.getName(), e);
             return null;
         }
     }

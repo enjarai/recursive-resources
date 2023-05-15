@@ -1,0 +1,2 @@
+- Fixed a crash when builtin resource packs contain illegal characters.
+- Added additional debug logging for packs that we don't know how to handle.

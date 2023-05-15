@@ -65,10 +65,17 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: Artifacts
+      - name: Update GitHub Release
+        uses: tubone24/update_release@v1.3.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          body_path: CHANGELOG.md
+          is_append_body: true
       - name: publish mod
         uses: Kir-Antipov/mc-publish@v3.2
         with:
-
+          changelog-file: CHANGELOG.md
           modrinth-featured: false
 
           files: '${{ steps.download.outputs.download-path }}/!(*-@(dev|sources)).jar'

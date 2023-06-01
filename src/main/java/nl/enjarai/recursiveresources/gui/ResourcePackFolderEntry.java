@@ -1,12 +1,9 @@
 package nl.enjarai.recursiveresources.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
-import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import nl.enjarai.recursiveresources.RecursiveResources;
@@ -18,8 +15,6 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
-
-import static nl.enjarai.recursiveresources.util.ResourcePackUtils.isChildOfFolder;
 
 public class ResourcePackFolderEntry extends ResourcePackEntry {
     public static final Identifier WIDGETS_TEXTURE = RecursiveResources.id("textures/gui/widgets.png");
@@ -86,24 +81,23 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     }
 
     @Override
-    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+    public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
         if (pack instanceof FolderPack folderPack) {
             folderPack.setHovered(hovered);
         }
 
-        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, hovered, tickDelta);
+        super.render(context, index, y, x, entryWidth, entryHeight, mouseX, mouseY, hovered, tickDelta);
 
         if (hovered) {
-            DrawableHelper.fill(matrices, x, y, x + 32, y + 32, 0xa0909090);
-            RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
+            context.fill(x, y, x + 32, y + 32, 0xa0909090);
 
             int relativeMouseX = mouseX - x;
 
             if (getChildren().size() > 0) {
                 if (relativeMouseX < 32) {
-                    DrawableHelper.drawTexture(matrices, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
+                    context.drawTexture(WIDGETS_TEXTURE, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
                 } else {
-                    DrawableHelper.drawTexture(matrices, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
+                    context.drawTexture(WIDGETS_TEXTURE, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
                 }
             }
         }

@@ -1,0 +1,12 @@
+recursiveresources:
+  sort:
+    a-z: A-Z
+    z-a: Z-A
+  view:
+    folder: Ordneransicht
+    flat: Flache Ansicht
+  folder:
+    back: (Zurück)
+    folder: (Ordner)
+  availablepacks.title.hover: Alle aktivieren
+  selectedpacks.title.hover: Alle deaktivieren

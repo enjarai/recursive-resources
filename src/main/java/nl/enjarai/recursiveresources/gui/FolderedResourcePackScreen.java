@@ -38,6 +38,8 @@ public class FolderedResourcePackScreen extends PackScreen {
     private static final Text SORT_ZA = Text.translatable("recursiveresources.sort.z-a");
     private static final Text VIEW_FOLDER = Text.translatable("recursiveresources.view.folder");
     private static final Text VIEW_FLAT = Text.translatable("recursiveresources.view.flat");
+    private static final Text AVAILABLE_PACKS_TITLE_HOVER = Text.translatable("recursiveresources.availablepacks.title.hover");
+    private static final Text SELECTED_PACKS_TITLE_HOVER = Text.translatable("recursiveresources.selectedpacks.title.hover");
 
     private final MinecraftClient client = MinecraftClient.getInstance();
 
@@ -45,7 +47,7 @@ public class FolderedResourcePackScreen extends PackScreen {
     private Comparator<ResourcePackEntry> currentSorter;
 
     private PackListWidget originalAvailablePacks;
-    private FolderedPackListWidget customAvailablePacks;
+    private PackListWidget customAvailablePacks;
     private TextFieldWidget searchField;
 
     private Path currentFolder = ROOT_FOLDER;
@@ -91,24 +93,6 @@ public class FolderedResourcePackScreen extends PackScreen {
                 .build()
         );
 
-        // Load all available packs button
-        addDrawableChild(new SilentTexturedButtonWidget(width / 2 - 204, 0, 32, 32, 0, 0, WIDGETS_TEXTURE, btn -> {
-            for (ResourcePackEntry entry : Lists.reverse(List.copyOf(availablePackList.children()))) {
-                if (entry.pack.canBeEnabled()) {
-                    entry.pack.enable();
-                }
-            }
-        }));
-
-        // Unload all button
-        addDrawableChild(new SilentTexturedButtonWidget(width / 2 + 204 - 32, 0, 32, 32, 32, 0, WIDGETS_TEXTURE, btn -> {
-            for (ResourcePackEntry entry : List.copyOf(selectedPackList.children())) {
-                if (entry.pack.canBeDisabled()) {
-                    entry.pack.disable();
-                }
-            }
-        }));
-
         searchField = addDrawableChild(new TextFieldWidget(
                 textRenderer, width / 2 - 179, height - 46, 154, 16, searchField, Text.of("")));
         searchField.setFocusUnlocked(true);
@@ -118,8 +102,26 @@ public class FolderedResourcePackScreen extends PackScreen {
         // Replacing the available pack list with our custom implementation
         originalAvailablePacks = availablePackList;
         remove(originalAvailablePacks);
-        addSelectableChild(customAvailablePacks = new FolderedPackListWidget(originalAvailablePacks, this, 200, height, width / 2 - 204));
+        addSelectableChild(customAvailablePacks = new PackListWidget(client, this, 200, height, availablePackList.title));
+        customAvailablePacks.setLeftPos(width / 2 - 204);
+        // Make the title of the available packs selector clickable to load all packs
+        ((FolderedPackListWidget) customAvailablePacks).recursiveresources$setTitleClickable(AVAILABLE_PACKS_TITLE_HOVER, null, () -> {
+            for (ResourcePackEntry entry : Lists.reverse(List.copyOf(availablePackList.children()))) {
+                if (entry.pack.canBeEnabled()) {
+                    entry.pack.enable();
+                }
+            }
+        });
         availablePackList = customAvailablePacks;
+
+        // Also make the selected packs title clickable to unload them
+        ((FolderedPackListWidget) selectedPackList).recursiveresources$setTitleClickable(SELECTED_PACKS_TITLE_HOVER, null, () -> {
+            for (ResourcePackEntry entry : List.copyOf(selectedPackList.children())) {
+                if (entry.pack.canBeDisabled()) {
+                    entry.pack.disable();
+                }
+            }
+        });
 
         listProcessor.pauseCallback();
         listProcessor.setSorter(currentSorter == null ? (currentSorter = ResourcePackListProcessor.sortAZ) : currentSorter);

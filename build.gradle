@@ -1,9 +1,7 @@
-import groovy.json.JsonSlurper
-import groovy.json.JsonBuilder
-
 plugins {
     id 'fabric-loom' version '1.0-SNAPSHOT'
     id 'maven-publish'
+    id 'me.fallenbreath.yamlang' version '1.2.1'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -49,37 +47,6 @@ processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version
     }
-
-    filesMatching("assets/*/lang/*.json") {
-        filter(ReplaceContentFilter)
-    }
-}
-
-class ReplaceContentFilter extends FilterReader {
-    ReplaceContentFilter(Reader reader) {
-        super(getJson(reader))
-    }
-
-    static Reader getJson(Reader reader) {
-        def parsed = new JsonSlurper().parse(reader) as Map<String, ?>
-        Map<String, String> map = new HashMap<>()
-        flattenJsonMap(map, parsed, "")
-        return new StringReader(new JsonBuilder(map).toPrettyString())
-    }
-
-    def static flattenJsonMap(Map<String, ?> outputMap, Object curElement, String keyPart) {
-        if (curElement instanceof Map<String, ?>) {
-            for (entry in curElement) {
-                String key
-                if (keyPart.length() == 0) key = entry.key
-                else key = keyPart + "." + entry.key
-                flattenJsonMap(outputMap, entry.value, key)
-            }
-        }
-        else {
-            outputMap.put(keyPart, curElement)
-        }
-    }
 }
 
 version = "$version+$minecraft_version"
@@ -120,4 +87,9 @@ publishing {
             from components.java
         }
     }
+}
+
+yamlang {
+    targetSourceSets = [sourceSets.main]
+    inputDir = 'assets/recursiveresources/lang'
 }

@@ -1,10 +1,19 @@
 pluginManagement {
     repositories {
         jcenter()
-        maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
-        }
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.enjarai.nl/mirrors"}
+        mavenCentral()
         gradlePluginPortal()
+    }
+    resolutionStrategy {
+        eachPlugin {
+            switch (requested.id.id) {
+                case "me.fallenbreath.yamlang": {
+                    useModule("com.github.Fallen-Breath:yamlang:${requested.version}")
+                    break
+                }
+            }
+        }
     }
 }

@@ -34,7 +34,7 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
                 MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(NativeImage.read(stream)));
                 return id;
             } catch (Exception e) {
-                LogManager.getLogger(FolderPack.class).warn("Error loading custom folder icon:");
+                RecursiveResources.LOGGER.warn("Error loading custom folder icon:");
                 e.printStackTrace();
             }
         }

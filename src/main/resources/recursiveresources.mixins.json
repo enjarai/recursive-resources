@@ -6,7 +6,9 @@
     "FileResourcePackProviderMixin"
   ],
   "client": [
+    "EntryListWidgetMixin",
     "OptionsScreenMixin",
+    "PackListWidgetMixin",
     "ResourcePackManagerMixin"
   ],
   "injectors": {

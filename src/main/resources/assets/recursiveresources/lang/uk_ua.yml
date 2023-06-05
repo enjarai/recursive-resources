@@ -8,3 +8,5 @@ recursiveresources:
   folder:
     back: (Назад)
     folder: (Папка)
+  availablepacks.title.hover: Вимкнути все
+  selectedpacks.title.hover: Вимкнути все

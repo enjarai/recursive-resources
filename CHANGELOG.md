@@ -1,3 +1,1 @@
-- Updated to 1.20.
-- Merged the "enable all" and "disable all" buttons into the "available" and "selected" titles.
-  - This should help fix some overlapping ui with other mods, and removes clutter.
+- Marked compatible with 1.20.1

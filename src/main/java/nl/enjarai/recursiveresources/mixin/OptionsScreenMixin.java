@@ -17,7 +17,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 
 @Mixin(OptionsScreen.class)
-public abstract class OptionsScreenMixin {
+public abstract class OptionsScreenMixin extends Screen {
+    protected OptionsScreenMixin(Text title) {
+        super(title);
+    }
+
     @Shadow
     protected abstract void refreshResourcePacks(ResourcePackManager resourcePackManager);
 
@@ -40,7 +44,7 @@ public abstract class OptionsScreenMixin {
         }
 
         return new FolderedResourcePackScreen(
-                client.getResourcePackManager(),
+                this, client.getResourcePackManager(),
                 this::refreshResourcePacks, client.getResourcePackDir().toFile(),
                 Text.translatable("resourcePack.title"),
                 packRoots

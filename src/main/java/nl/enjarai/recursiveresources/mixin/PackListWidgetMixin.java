@@ -20,8 +20,7 @@ import java.util.List;
 
 @Mixin(PackListWidget.class)
 public abstract class PackListWidgetMixin extends EntryListWidgetMixin implements FolderedPackListWidget {
-    @Shadow @Final private PackScreen screen;
-    @Shadow @Final public Text title;
+    @Shadow @Final PackScreen screen;
     @Unique
     @Nullable
     private Text titleHoverText;
@@ -70,7 +69,7 @@ public abstract class PackListWidgetMixin extends EntryListWidgetMixin implement
 
     @Override
     protected void recursiveresources$handleHeaderClick(int x, int y, CallbackInfo ci) {
-        if (titleClickEvent != null) {
+        if (titleClickEvent != null && y <= client.textRenderer.fontHeight) {
             titleClickEvent.run();
         }
     }

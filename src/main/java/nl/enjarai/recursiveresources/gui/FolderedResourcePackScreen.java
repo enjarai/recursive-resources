@@ -2,6 +2,7 @@ package nl.enjarai.recursiveresources.gui;
 
 import com.google.common.collect.Lists;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
 import net.minecraft.client.gui.screen.pack.PackScreen;
@@ -26,9 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry.WIDGETS_TEXTURE;
-import static nl.enjarai.recursiveresources.util.ResourcePackUtils.isFolderButNotFolderBasedPack;
-
 public class FolderedResourcePackScreen extends PackScreen {
     private static final Path ROOT_FOLDER = Path.of("");
 
@@ -41,7 +39,8 @@ public class FolderedResourcePackScreen extends PackScreen {
     private static final Text AVAILABLE_PACKS_TITLE_HOVER = Text.translatable("recursiveresources.availablepacks.title.hover");
     private static final Text SELECTED_PACKS_TITLE_HOVER = Text.translatable("recursiveresources.selectedpacks.title.hover");
 
-    private final MinecraftClient client = MinecraftClient.getInstance();
+    protected final MinecraftClient client = MinecraftClient.getInstance();
+    protected final Screen parent;
 
     private final ResourcePackListProcessor listProcessor = new ResourcePackListProcessor(this::refresh);
     private Comparator<ResourcePackEntry> currentSorter;
@@ -55,8 +54,9 @@ public class FolderedResourcePackScreen extends PackScreen {
     private boolean folderView = true;
     public final List<Path> roots;
 
-    public FolderedResourcePackScreen(ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
+    public FolderedResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
         super(packManager, applier, mainRoot.toPath(), title);
+        this.parent = parent;
         this.roots = roots;
         this.currentFolderMeta = FolderMeta.loadMetaFile(roots, currentFolder);
         this.currentSorter = (pack1, pack2) -> Integer.compare(
@@ -79,6 +79,9 @@ public class FolderedResourcePackScreen extends PackScreen {
         findButton(DONE).ifPresent(btn -> {
             btn.setX(width / 2 + 25);
             btn.setY(height - 26);
+            if (btn instanceof ButtonWidget button) {
+                button.onPress = btn2 -> applyAndClose();
+            }
         });
 
         addDrawableChild(
@@ -231,8 +234,15 @@ public class FolderedResourcePackScreen extends PackScreen {
         searchField.tick();
     }
 
+    protected void applyAndClose() {
+        organizer.apply();
+        closeDirectoryWatcher();
+    }
+
     @Override
-    public void removed() {
-        super.removed();
+    public void close() {
+        closeDirectoryWatcher();
+        client.setScreen(parent);
+        client.options.addResourcePackProfilesToManager(client.getResourcePackManager());
     }
 }

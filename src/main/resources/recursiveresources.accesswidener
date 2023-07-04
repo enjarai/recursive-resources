@@ -15,6 +15,12 @@ accessible  method   net/minecraft/client/gui/screen/pack/PackScreen    refresh 
 
 accessible  field    net/minecraft/client/gui/screen/pack/PackListWidget    title    Lnet/minecraft/text/Text;
 
+accessible  method   net/minecraft/client/gui/screen/pack/PackScreen    closeDirectoryWatcher    ()V
+accessible  field    net/minecraft/client/gui/screen/pack/PackScreen    organizer    Lnet/minecraft/client/gui/screen/pack/ResourcePackOrganizer;
+
+accessible  field    net/minecraft/client/gui/widget/ButtonWidget    onPress    Lnet/minecraft/client/gui/widget/ButtonWidget$PressAction;
+mutable     field    net/minecraft/client/gui/widget/ButtonWidget    onPress    Lnet/minecraft/client/gui/widget/ButtonWidget$PressAction;
+
 # Required for getting the path of a resource pack entry
 accessible  field    net/minecraft/client/gui/screen/pack/PackListWidget$ResourcePackEntry    pack    Lnet/minecraft/client/gui/screen/pack/ResourcePackOrganizer$Pack;
 

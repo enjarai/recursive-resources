@@ -1,2 +1,1 @@
-- Added the ability to cancel changes by exiting the pack screen using escape instead of the done button.
-- Fixed the whole pack list being recognised as a header.
+- Updated to 1.20.2

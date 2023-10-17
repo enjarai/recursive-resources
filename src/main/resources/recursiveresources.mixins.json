@@ -3,7 +3,9 @@
   "package": "nl.enjarai.recursiveresources.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "FileResourcePackProviderMixin"
+    "FileResourcePackProviderMixin",
+    "ZipFileWrapperAccessor",
+    "ZipResourcePackAccessor"
   ],
   "client": [
     "EntryListWidgetMixin",

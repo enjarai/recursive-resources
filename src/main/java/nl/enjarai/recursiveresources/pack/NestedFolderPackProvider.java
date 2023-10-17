@@ -59,13 +59,13 @@ public class NestedFolderPackProvider implements ResourcePackProvider {
         if (fileOrFolder.isDirectory()) {
             info = ResourcePackProfile.create(
                     name, Text.literal(displayName), false,
-                    (packName) -> new DirectoryResourcePack(packName, fileOrFolder.toPath(), true),
+                    new DirectoryResourcePack.DirectoryBackedFactory(fileOrFolder.toPath(), true),
                     ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, packSource
             );
         } else {
             info = ResourcePackProfile.create(
                     name, Text.literal(displayName), false,
-                    (packName) -> new ZipResourcePack(packName, fileOrFolder, true),
+                    new ZipResourcePack.ZipBackedFactory(fileOrFolder, true),
                     ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, packSource
             );
         }

@@ -5,6 +5,8 @@ import net.minecraft.resource.DirectoryResourcePack;
 import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ZipResourcePack;
 import nl.enjarai.recursiveresources.RecursiveResources;
+import nl.enjarai.recursiveresources.mixin.ZipFileWrapperAccessor;
+import nl.enjarai.recursiveresources.mixin.ZipResourcePackAccessor;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -45,7 +47,7 @@ public class ResourcePackUtils {
             if (pack instanceof DirectoryResourcePack directoryResourcePack) {
                 return directoryResourcePack.root;
             } else if (pack instanceof ZipResourcePack zipResourcePack) {
-                return zipResourcePack.backingZipFile.toPath();
+                return ((ZipFileWrapperAccessor) ((ZipResourcePackAccessor) zipResourcePack).getZipFileWrapper()).getFile().toPath();
             } else if (pack instanceof ModNioResourcePack modResourcePack) {
                 return Path.of(modResourcePack.getName().replaceAll(UNSAFE_PATH_REGEX, "_"));
             } else {

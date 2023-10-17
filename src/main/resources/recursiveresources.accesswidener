@@ -29,4 +29,6 @@ accessible  field    net/minecraft/client/gui/screen/pack/PackListWidget$Resourc
 accessible  field    net/minecraft/client/gui/screen/pack/ResourcePackOrganizer$AbstractPack    profile    Lnet/minecraft/resource/ResourcePackProfile;
 
 accessible  field    net/minecraft/resource/DirectoryResourcePack    root    Ljava/nio/file/Path;
-accessible  field    net/minecraft/resource/ZipResourcePack    backingZipFile    Ljava/io/File;
+
+# NEW!
+accessible  class    net/minecraft/resource/ZipResourcePack$ZipFileWrapper

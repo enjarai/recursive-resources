@@ -231,7 +231,6 @@ public class FolderedResourcePackScreen extends PackScreen {
     @Override
     public void tick() {
         super.tick();
-        searchField.tick();
     }
 
     protected void applyAndClose() {

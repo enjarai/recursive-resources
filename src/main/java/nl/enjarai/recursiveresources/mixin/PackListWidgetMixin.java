@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -31,6 +32,10 @@ public abstract class PackListWidgetMixin extends EntryListWidgetMixin implement
     @Nullable
     private Runnable titleClickEvent;
 
+    public PackListWidgetMixin(int i, int j, int k, int l, Text text) {
+        super(i, j, k, l, text);
+    }
+
     @Override
     public void recursiveresources$setTitleClickable(Text hoverText, Text tooltip, Runnable clickEvent) {
         this.titleHoverText = hoverText;
@@ -46,7 +51,7 @@ public abstract class PackListWidgetMixin extends EntryListWidgetMixin implement
             int textWidth = client.textRenderer.getWidth(text);
 
             int left = x + width / 2 - textWidth / 2;
-            int top = Math.min(this.top + 3, y);
+            int top = Math.min(this.getY() + 3, y);
             int right = left + textWidth;
             int bottom = top + client.textRenderer.fontHeight;
 
@@ -68,7 +73,7 @@ public abstract class PackListWidgetMixin extends EntryListWidgetMixin implement
     }
 
     @Override
-    protected void recursiveresources$handleHeaderClick(int x, int y, CallbackInfo ci) {
+    protected void recursiveresources$handleHeaderClick(int x, int y, CallbackInfoReturnable<Boolean> ci) {
         if (titleClickEvent != null && y <= client.textRenderer.fontHeight) {
             titleClickEvent.run();
         }

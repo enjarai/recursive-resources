@@ -105,8 +105,8 @@ public class FolderedResourcePackScreen extends PackScreen {
         // Replacing the available pack list with our custom implementation
         originalAvailablePacks = availablePackList;
         remove(originalAvailablePacks);
-        addSelectableChild(customAvailablePacks = new PackListWidget(client, this, 200, height, availablePackList.title));
-        customAvailablePacks.setLeftPos(width / 2 - 204);
+        addDrawableChild(customAvailablePacks = new PackListWidget(client, this, 200, height, availablePackList.title));
+        customAvailablePacks.setPosition(width / 2 - 204, originalAvailablePacks.getY());
         // Make the title of the available packs selector clickable to load all packs
         ((FolderedPackListWidget) customAvailablePacks).recursiveresources$setTitleClickable(AVAILABLE_PACKS_TITLE_HOVER, null, () -> {
             for (ResourcePackEntry entry : Lists.reverse(List.copyOf(availablePackList.children()))) {

@@ -8,5 +8,7 @@ recursiveresources:
   folder:
     back: (Back)
     folder: (Folder)
+    errored: Error loading folder.json
+    errored_description: Please make sure your json structure is correct
   availablepacks.title.hover: Enable all
   selectedpacks.title.hover: Disable all

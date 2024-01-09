@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record FolderMeta(Path icon, String description, List<Path> packs, boolean hidden) {
+public record FolderMeta(Path icon, String description, List<Path> packs, boolean hidden, boolean errored) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path DUMMY_ROOT_PATH = Path.of("/");
     private static final Path EMPTY_PATH = Path.of("");
@@ -32,7 +32,12 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
     ).apply(instance, FolderMeta::new));
 
     public static final FolderMeta DEFAULT = new FolderMeta(Path.of("icon.png"), "", List.of(), false);
+    public static final FolderMeta ERRORED = new FolderMeta(Path.of("icon.png"), "", List.of(), false, true);
     public static final String META_FILE_NAME = "folder.json";
+
+    public FolderMeta(Path icon, String description, List<Path> packs, boolean hidden) {
+        this(icon, description, packs, hidden, false);
+    }
 
     public static FolderMeta loadMetaFile(List<Path> roots, Path folder) {
         for (var root : roots) {
@@ -46,16 +51,18 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
                     meta = FolderMeta.load(metaFile);
                 }
 
-                try (Stream<Path> packs = Files.list(rootedFolder)) {
-                    meta = meta.getRefreshed(packs
-                            .filter(ResourcePackUtils::isPack)
-                            .map(Path::normalize)
-                            .map(rootedFolder::relativize)
-                            .toList()
-                    );
-                    meta.save(metaFile);
-                } catch (Exception e) {
-                    RecursiveResources.LOGGER.error("Failed to process meta file for folder " + folder, e);
+                if (!meta.errored()) {
+                    try (Stream<Path> packs = Files.list(rootedFolder)) {
+                        meta = meta.getRefreshed(packs
+                                .filter(ResourcePackUtils::isPack)
+                                .map(Path::normalize)
+                                .map(rootedFolder::relativize)
+                                .toList()
+                        );
+                        meta.save(metaFile);
+                    } catch (Exception e) {
+                        RecursiveResources.LOGGER.error("Failed to process meta file for folder " + folder, e);
+                    }
                 }
 
                 return meta;
@@ -77,17 +84,21 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
             return CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, RecursiveResources.LOGGER::error);
         } catch (Exception e) {
             RecursiveResources.LOGGER.error("Failed to load folder meta file: " + metaFile, e);
-            return DEFAULT;
+            return ERRORED;
         }
     }
 
     public void save(Path metaFile) {
-        try (var writer = Files.newBufferedWriter(metaFile)) {
-            var json = CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow(false, RecursiveResources.LOGGER::error);
+        if (!errored) {
+            try (var writer = Files.newBufferedWriter(metaFile)) {
+                var json = CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow(false, RecursiveResources.LOGGER::error);
 
-            writer.write(GSON.toJson(json));
-        } catch (Exception e) {
-            RecursiveResources.LOGGER.error("Failed to save folder meta file: " + metaFile, e);
+                writer.write(GSON.toJson(json));
+            } catch (Exception e) {
+                RecursiveResources.LOGGER.error("Failed to save folder meta file: " + metaFile, e);
+            }
+        } else {
+            RecursiveResources.LOGGER.warn("Skipped overwriting meta file due to previous error: " + metaFile);
         }
     }
 
@@ -100,7 +111,7 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
             }
         }
 
-        return new FolderMeta(icon, description, Collections.unmodifiableList(packs), hidden);
+        return new FolderMeta(icon, description, Collections.unmodifiableList(packs), hidden, errored);
     }
 
     public int sortEntry(PackListWidget.ResourcePackEntry entry, Path folder) {

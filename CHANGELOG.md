@@ -1,1 +1,2 @@
-- Updated to 1.20.4
+- Added an ingame error message when a folder.json file is malformed.
+- Hopefully prevented the mod from overwriting malformed json files.

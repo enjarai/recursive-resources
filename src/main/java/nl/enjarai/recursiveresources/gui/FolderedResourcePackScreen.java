@@ -167,8 +167,10 @@ public class FolderedResourcePackScreen extends PackScreen {
 
             // add a ".." entry when not in the root folder
             if (notInRoot()) {
+                var folder = getParentFileSafe(currentFolder);
+                var meta = FolderMeta.loadMetaFile(roots, folder);
                 folders.add(new ResourcePackFolderEntry(client, customAvailablePacks,
-                        this, getParentFileSafe(currentFolder), true));
+                        this, folder, true, meta));
             }
 
             // create entries for all the folders that aren't packs
@@ -184,8 +186,9 @@ public class FolderedResourcePackScreen extends PackScreen {
                             continue;
                         }
 
+                        var meta = FolderMeta.loadMetaFile(roots, relative);
                         var entry = new ResourcePackFolderEntry(client, customAvailablePacks,
-                                this, relative);
+                                this, relative, false, meta);
 
                         if (((FolderPack) entry.pack).isVisible()) {
                             folders.add(entry);

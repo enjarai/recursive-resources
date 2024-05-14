@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class NestedFolderPackProvider implements ResourcePackProvider {
@@ -58,15 +59,17 @@ public class NestedFolderPackProvider implements ResourcePackProvider {
 
         if (fileOrFolder.isDirectory()) {
             info = ResourcePackProfile.create(
-                    name, Text.literal(displayName), false,
-                    new DirectoryResourcePack.DirectoryBackedFactory(fileOrFolder.toPath(), true),
-                    ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, packSource
+                new ResourcePackInfo(name, Text.literal(displayName), ResourcePackSource.BUILTIN, Optional.empty()),
+                new DirectoryResourcePack.DirectoryBackedFactory(fileOrFolder.toPath()),
+                ResourceType.CLIENT_RESOURCES,
+                new ResourcePackPosition(false, InsertionPosition.TOP, false)
             );
         } else {
             info = ResourcePackProfile.create(
-                    name, Text.literal(displayName), false,
-                    new ZipResourcePack.ZipBackedFactory(fileOrFolder, true),
-                    ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, packSource
+                new ResourcePackInfo(name, Text.literal(displayName), ResourcePackSource.BUILTIN, Optional.empty()),
+                new ZipResourcePack.ZipBackedFactory(fileOrFolder),
+                ResourceType.CLIENT_RESOURCES,
+                new ResourcePackPosition(false, InsertionPosition.TOP, false)
             );
         }
 

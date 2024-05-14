@@ -81,7 +81,7 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
         try (var reader = Files.newBufferedReader(metaFile)) {
             var json = JsonParser.parseReader(reader);
 
-            return CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, RecursiveResources.LOGGER::error);
+            return CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
         } catch (Exception e) {
             RecursiveResources.LOGGER.error("Failed to load folder meta file: " + metaFile, e);
             return ERRORED;
@@ -91,7 +91,7 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
     public void save(Path metaFile) {
         if (!errored) {
             try (var writer = Files.newBufferedWriter(metaFile)) {
-                var json = CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow(false, RecursiveResources.LOGGER::error);
+                var json = CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow();
 
                 writer.write(GSON.toJson(json));
             } catch (Exception e) {

@@ -27,7 +27,7 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
     public static final Codec<FolderMeta> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Path::of, Path::toString).fieldOf("icon").forGetter(FolderMeta::icon),
             Codec.STRING.fieldOf("description").forGetter(FolderMeta::description),
-            Codec.STRING.xmap(Path::of, Path::toString).listOf().fieldOf("packs").forGetter(FolderMeta::packs),
+            Codec.STRING.xmap(Path::of, Path::toString).listOf().fieldOf("packs").forGetter(FolderMeta::packs), // TODO only add packs that arent in any other meta automatically
             Codec.BOOL.fieldOf("hidden").forGetter(FolderMeta::hidden)
     ).apply(instance, FolderMeta::new));
 

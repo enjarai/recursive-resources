@@ -30,7 +30,7 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
                 // Ensure the path only contains "a-z0-9_.-" characters
                 relativePath = relativePath.toLowerCase().replaceAll("[^a-zA-Z0-9_.-]", "_");
 
-                Identifier id = RecursiveResources.id("textures/gui/folder_icons/" + relativePath + "/" + icon.getFileName());
+                Identifier id = RecursiveResources.id("textures/gui/custom_folders/" + relativePath + "/" + icon.getFileName());
                 MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(NativeImage.read(stream)));
                 return id;
             } catch (Exception e) {

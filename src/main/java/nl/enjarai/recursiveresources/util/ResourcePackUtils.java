@@ -49,13 +49,13 @@ public class ResourcePackUtils {
             } else if (pack instanceof ZipResourcePack zipResourcePack) {
                 return ((ZipFileWrapperAccessor) ((ZipResourcePackAccessor) zipResourcePack).getZipFileWrapper()).getFile().toPath();
             } else if (pack instanceof ModNioResourcePack modResourcePack) {
-                return Path.of(modResourcePack.getId().replaceAll(UNSAFE_PATH_REGEX, "_"));
+                return Path.of(modResourcePack.toString().replaceAll(UNSAFE_PATH_REGEX, "_"));
             } else {
-                RecursiveResources.LOGGER.warn("Failed to determine source folder for pack: " + pack.getId() + ", unknown pack type: " + pack.getClass().getName());
+                RecursiveResources.LOGGER.warn("Failed to determine source folder for pack: " + pack.toString() + ", unknown pack type: " + pack.getClass().getName());
                 return null;
             }
         } catch (Exception e) {
-            RecursiveResources.LOGGER.error("Error determining source folder for pack: " + pack.getId(), e);
+            RecursiveResources.LOGGER.error("Error determining source folder for pack: " + pack.toString(), e);
             return null;
         }
     }

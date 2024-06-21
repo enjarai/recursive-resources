@@ -12,6 +12,7 @@ import net.minecraft.resource.ResourcePackSource;
 import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry;
 import nl.enjarai.recursiveresources.util.ResourcePackUtils;
+import org.slf4j.Marker;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +28,7 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
     public static final Codec<FolderMeta> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Path::of, Path::toString).fieldOf("icon").forGetter(FolderMeta::icon),
             Codec.STRING.fieldOf("description").forGetter(FolderMeta::description),
-            Codec.STRING.xmap(Path::of, Path::toString).listOf().fieldOf("packs").forGetter(FolderMeta::packs), // TODO only add packs that arent in any other meta automatically
+            Codec.STRING.xmap(Path::of, Path::toString).listOf().fieldOf("packs").forGetter(FolderMeta::packs),
             Codec.BOOL.fieldOf("hidden").forGetter(FolderMeta::hidden)
     ).apply(instance, FolderMeta::new));
 
@@ -49,6 +50,23 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
 
                 if (Files.exists(metaFile)) {
                     meta = FolderMeta.load(metaFile);
+
+                    //if contents of folder have changed, refresh meta file
+                    if (meta.packs().stream().anyMatch(pack -> !Files.exists(rootedFolder.resolve(pack)))) {
+                        meta = FolderMeta.DEFAULT;
+
+                        try (Stream<Path> packs = Files.list(rootedFolder)) {
+                            meta = meta.getRefreshed(packs
+                                    .filter(ResourcePackUtils::isPack)
+                                    .map(Path::normalize)
+                                    .map(rootedFolder::relativize)
+                                    .toList()
+                            );
+                            meta.save(metaFile);
+                        } catch (Exception e) {
+                            RecursiveResources.LOGGER.error("Failed to process meta file for folder " + folder, e);
+                        }
+                    }
                 }
 
                 if (!meta.errored()) {
@@ -127,6 +145,7 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
 
     public boolean containsEntry(PackListWidget.ResourcePackEntry entry, Path folder) {
         Path pack;
+        Path packParent = EMPTY_PATH;
 
         if (entry.pack.getSource() instanceof FolderedPackSource folderedPackSource) {
             pack = folderedPackSource.file();
@@ -140,10 +159,10 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
             if (fsPath == null) return false;
 
             pack = EMPTY_PATH.resolve(fsPath.getFileName());
+            packParent = fsPath.getParent() != null ? fsPath.getParent() : EMPTY_PATH;
         }
 
         Path relativePath = relativiseRelativePath(folder, pack);
-        Path packParent = pack.getParent() != null ? pack.getParent() : EMPTY_PATH;
-        return folder.equals(packParent) || packs().contains(relativePath);
+        return packs().contains(relativePath) || packParent.endsWith(folder);
     }
 }

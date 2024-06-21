@@ -50,23 +50,6 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
 
                 if (Files.exists(metaFile)) {
                     meta = FolderMeta.load(metaFile);
-
-                    //if contents of folder have changed, refresh meta file
-                    if (meta.packs().stream().anyMatch(pack -> !Files.exists(rootedFolder.resolve(pack)))) {
-                        meta = FolderMeta.DEFAULT;
-
-                        try (Stream<Path> packs = Files.list(rootedFolder)) {
-                            meta = meta.getRefreshed(packs
-                                    .filter(ResourcePackUtils::isPack)
-                                    .map(Path::normalize)
-                                    .map(rootedFolder::relativize)
-                                    .toList()
-                            );
-                            meta.save(metaFile);
-                        } catch (Exception e) {
-                            RecursiveResources.LOGGER.error("Failed to process meta file for folder " + folder, e);
-                        }
-                    }
                 }
 
                 if (!meta.errored()) {

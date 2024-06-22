@@ -12,7 +12,6 @@ import net.minecraft.resource.ResourcePackSource;
 import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry;
 import nl.enjarai.recursiveresources.util.ResourcePackUtils;
-import org.slf4j.Marker;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

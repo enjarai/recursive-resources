@@ -47,6 +47,8 @@ public class FolderedResourcePackScreen extends PackScreen {
 
     private PackListWidget originalAvailablePacks;
     private PackListWidget customAvailablePacks;
+    private PackListWidget originalSelectedPackList;
+    private PackListWidget customSelectedPacks;
     private TextFieldWidget searchField;
 
     private Path currentFolder = ROOT_FOLDER;
@@ -71,42 +73,12 @@ public class FolderedResourcePackScreen extends PackScreen {
     protected void init() {
         super.init();
 
-        findButton(OPEN_PACK_FOLDER).ifPresent(btn -> {
-            btn.setX(width / 2 + 25);
-            btn.setY(height - 48);
-        });
-
-        findButton(DONE).ifPresent(btn -> {
-            btn.setX(width / 2 + 25);
-            btn.setY(height - 26);
-            if (btn instanceof ButtonWidget button) {
-                button.onPress = btn2 -> applyAndClose();
-            }
-        });
-
-        addDrawableChild(
-                ButtonWidget.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
-                    folderView = !folderView;
-                    btn.setMessage(folderView ? VIEW_FOLDER : VIEW_FLAT);
-
-                    refresh();
-                    customAvailablePacks.setScrollAmount(0.0);
-                })
-                .dimensions(width / 2 - 179, height - 26, 154, 20)
-                .build()
-        );
-
-        searchField = addDrawableChild(new TextFieldWidget(
-                textRenderer, width / 2 - 179, height - 46, 154, 16, searchField, Text.of("")));
-        searchField.setFocusUnlocked(true);
-        searchField.setChangedListener(listProcessor::setFilter);
-        addDrawableChild(searchField);
-
         // Replacing the available pack list with our custom implementation
         originalAvailablePacks = availablePackList;
+        addDrawableChild(customAvailablePacks = new PackListWidget(client, this,
+                originalAvailablePacks.getWidth(), originalAvailablePacks.getHeight(), availablePackList.title));
+        customAvailablePacks.setPosition(originalAvailablePacks.getX(), originalAvailablePacks.getY());
         remove(originalAvailablePacks);
-        addDrawableChild(customAvailablePacks = new PackListWidget(client, this, 200, height, availablePackList.title));
-        customAvailablePacks.setPosition(width / 2 - 204, originalAvailablePacks.getY());
         // Make the title of the available packs selector clickable to load all packs
         ((FolderedPackListWidget) customAvailablePacks).recursiveresources$setTitleClickable(AVAILABLE_PACKS_TITLE_HOVER, null, () -> {
             for (ResourcePackEntry entry : Lists.reverse(List.copyOf(availablePackList.children()))) {
@@ -117,18 +89,52 @@ public class FolderedResourcePackScreen extends PackScreen {
         });
         availablePackList = customAvailablePacks;
 
+        originalSelectedPackList = selectedPackList;
+        remove(originalSelectedPackList);
+        addDrawableChild(customSelectedPacks = new PackListWidget(client, this,
+                selectedPackList.getWidth(), selectedPackList.getHeight(), selectedPackList.title));
+        customSelectedPacks.setPosition(selectedPackList.getX(), selectedPackList.getY());
+
         // Also make the selected packs title clickable to unload them
-        ((FolderedPackListWidget) selectedPackList).recursiveresources$setTitleClickable(SELECTED_PACKS_TITLE_HOVER, null, () -> {
-            for (ResourcePackEntry entry : List.copyOf(selectedPackList.children())) {
+        ((FolderedPackListWidget) customSelectedPacks).recursiveresources$setTitleClickable(SELECTED_PACKS_TITLE_HOVER, null, () -> {
+            for (ResourcePackEntry entry : List.copyOf(customSelectedPacks.children())) {
                 if (entry.pack.canBeDisabled()) {
                     entry.pack.disable();
                 }
             }
         });
 
+        selectedPackList = customSelectedPacks;
+
+        findButton(DONE).ifPresent(btn -> {
+            if (btn instanceof ButtonWidget button) {
+                button.onPress = btn2 -> applyAndClose();
+            }
+        });
+
+        /*
+        addDrawableChild(
+                ButtonWidget.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
+                            folderView = !folderView;
+                            btn.setMessage(folderView ? VIEW_FOLDER : VIEW_FLAT);
+
+                            refresh();
+                            customAvailablePacks.setScrollAmount(0.0);
+                        })
+                        .dimensions(ButtonWidget.DEFAULT_WIDTH, ButtonWidget.DEFAULT_HEIGHT, ButtonWidget.DEFAULT_WIDTH, ButtonWidget.DEFAULT_WIDTH)
+                        .build()
+        );
+
+        searchField = addDrawableChild(new TextFieldWidget(
+                textRenderer, width / 2 - 179, height - 46, 154, 16, searchField, Text.of("")));
+        searchField.setFocusUnlocked(true);
+        searchField.setChangedListener(listProcessor::setFilter);
+        addDrawableChild(searchField);
+        */
+
         listProcessor.pauseCallback();
         listProcessor.setSorter(currentSorter == null ? (currentSorter = ResourcePackListProcessor.sortAZ) : currentSorter);
-        listProcessor.setFilter(searchField.getText());
+        //listProcessor.setFilter(searchField.getText());
         listProcessor.resumeCallback();
     }
 

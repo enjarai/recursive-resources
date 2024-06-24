@@ -127,6 +127,7 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
 
     public boolean containsEntry(PackListWidget.ResourcePackEntry entry, Path folder) {
         Path pack;
+        Path packParent = EMPTY_PATH;
 
         if (entry.pack.getSource() instanceof FolderedPackSource folderedPackSource) {
             pack = folderedPackSource.file();
@@ -140,10 +141,10 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
             if (fsPath == null) return false;
 
             pack = EMPTY_PATH.resolve(fsPath.getFileName());
+            packParent = fsPath.getParent() != null ? fsPath.getParent() : EMPTY_PATH;
         }
 
         Path relativePath = relativiseRelativePath(folder, pack);
-        Path packParent = pack.getParent() != null ? pack.getParent() : EMPTY_PATH;
-        return folder.equals(packParent) || packs().contains(relativePath);
+        return packs().contains(relativePath) || packParent.endsWith(folder);
     }
 }

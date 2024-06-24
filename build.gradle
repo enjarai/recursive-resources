@@ -2,6 +2,7 @@ plugins {
     id 'fabric-loom' version '1.7-SNAPSHOT'
     id 'maven-publish'
     id 'me.fallenbreath.yamlang' version '1.3.1'
+    id "me.modmuss50.mod-publish-plugin" version "0.4.4"
 }
 
 sourceCompatibility = JavaVersion.VERSION_21
@@ -13,10 +14,10 @@ group = project.maven_group
 
 repositories {
     maven {
-        url "https://maven.enjarai.nl/releases"
+        url "https://maven.enjarai.dev/releases"
     }
     maven {
-        url "https://maven.enjarai.nl/mirrors"
+        url "https://maven.enjarai.dev/mirrors"
     }
 
     maven {
@@ -35,7 +36,7 @@ dependencies {
 
     modImplementation include("nl.enjarai:shared-resources-api:${project.shared_resources_version}")
 
-    include modImplementation("nl.enjarai:cicada-lib:${project.cicada_version}") {
+    modImplementation("nl.enjarai:cicada-lib:${project.cicada_version}") {
         exclude group: "net.fabricmc.fabric-api"
     }
 }
@@ -69,7 +70,7 @@ publishing {
     repositories {
         maven {
             name = "enjaraiMaven"
-            url = "https://maven.enjarai.nl/releases"
+            url = "https://maven.enjarai.dev/releases"
             credentials(PasswordCredentials)
             authentication {
                 basic(BasicAuthentication)
@@ -91,4 +92,72 @@ publishing {
 yamlang {
     targetSourceSets = [sourceSets.main]
     inputDir = 'assets/recursiveresources/lang'
+}
+
+publishMods {
+    file = remapJar.archiveFile
+    displayName = "${property('mod_version')} for ${property('minecraft_version')}"
+    version = project.version
+    changelog = getRootProject().file("CHANGELOG.md").text
+    type = STABLE
+    modLoaders.add("fabric")
+
+    def min = property('publish_target_min')
+    def max = property('publish_target_max')
+
+    if (providers.gradleProperty('enjaraiModrinthToken').present) {
+        modrinth {
+            projectId = property('mod_modrinth')
+            accessToken = providers.gradleProperty('enjaraiModrinthToken').get()
+
+            if (min == max) {
+                minecraftVersions.add(min)
+            } else {
+                minecraftVersionRange {
+                    start = min
+                    end = max
+                }
+            }
+
+            requires {
+                slug = "fabric-api"
+            }
+            requires {
+                slug = "cicada"
+            }
+        }
+    }
+
+    if (providers.gradleProperty('enjaraiCurseforgeToken').present) {
+        curseforge {
+            projectId = property('mod_curseforge')
+            accessToken = providers.gradleProperty('enjaraiCurseforgeToken').get()
+
+            if (min == max) {
+                minecraftVersions.add(min)
+            } else {
+                minecraftVersionRange {
+                    start = min
+                    end = max
+                }
+            }
+
+            requires {
+                slug = "fabric-api"
+            }
+            requires {
+                slug = "cicada"
+            }
+        }
+    }
+
+    if (providers.gradleProperty('enjaraiGithubToken').present) {
+        github {
+            repository = property('mod_github')
+            accessToken = providers.gradleProperty('enjaraiGithubToken').get()
+
+            commitish = property('git_branch')
+            tagName = project.version
+        }
+    }
 }

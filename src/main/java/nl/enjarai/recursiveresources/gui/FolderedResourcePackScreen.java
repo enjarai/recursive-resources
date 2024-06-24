@@ -75,13 +75,10 @@ public class FolderedResourcePackScreen extends PackScreen {
 
         // Replacing the available pack list with our custom implementation
         originalAvailablePacks = availablePackList;
-        int oldax = originalAvailablePacks.getX();
-        int olday = originalAvailablePacks.getY();
-        int oldaw = originalAvailablePacks.getWidth();
-        int oldah = originalAvailablePacks.getHeight();
+        addDrawableChild(customAvailablePacks = new PackListWidget(client, this,
+                originalAvailablePacks.getWidth(), originalAvailablePacks.getHeight(), availablePackList.title));
+        customAvailablePacks.setPosition(originalAvailablePacks.getX(), originalAvailablePacks.getY());
         remove(originalAvailablePacks);
-        addDrawableChild(customAvailablePacks = new PackListWidget(client, this, oldaw, oldah, availablePackList.title));
-        customAvailablePacks.setPosition(oldax, olday);
         // Make the title of the available packs selector clickable to load all packs
         ((FolderedPackListWidget) customAvailablePacks).recursiveresources$setTitleClickable(AVAILABLE_PACKS_TITLE_HOVER, null, () -> {
             for (ResourcePackEntry entry : Lists.reverse(List.copyOf(availablePackList.children()))) {
@@ -93,13 +90,10 @@ public class FolderedResourcePackScreen extends PackScreen {
         availablePackList = customAvailablePacks;
 
         originalSelectedPackList = selectedPackList;
-        int oldsx = selectedPackList.getX();
-        int oldsy = selectedPackList.getY();
-        int oldsw = selectedPackList.getWidth();
-        int oldsh = selectedPackList.getHeight();
         remove(originalSelectedPackList);
-        addDrawableChild(customSelectedPacks = new PackListWidget(client, this, oldsw, oldsh, selectedPackList.title));
-        customSelectedPacks.setPosition(oldsx, oldsy);
+        addDrawableChild(customSelectedPacks = new PackListWidget(client, this,
+                selectedPackList.getWidth(), selectedPackList.getHeight(), selectedPackList.title));
+        customSelectedPacks.setPosition(selectedPackList.getX(), selectedPackList.getY());
 
         // Also make the selected packs title clickable to unload them
         ((FolderedPackListWidget) customSelectedPacks).recursiveresources$setTitleClickable(SELECTED_PACKS_TITLE_HOVER, null, () -> {

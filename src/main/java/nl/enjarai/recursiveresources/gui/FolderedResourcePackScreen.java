@@ -118,11 +118,7 @@ public class FolderedResourcePackScreen extends PackScreen {
             }
         });
 
-        /* The code for writing to the gui can only be changed either by overwriting the screen, to bake in the button
-        to where it would be needed, the packscreen will probably need to be overritten. It looks like mojang has a
-        three part layout composing of a header, body, and footer. Based on their code you can write these elements, on
-        the footer there is an ability to add more buttons or other objects. Disabling to clean up UI for now.
-
+        /*
         addDrawableChild(
                 ButtonWidget.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
                             folderView = !folderView;

@@ -98,7 +98,7 @@ public class FolderedResourcePackScreen extends PackScreen {
         // Also make the selected packs title clickable to unload them
         ((FolderedPackListWidget) customSelectedPacks).recursiveresources$setTitleClickable(SELECTED_PACKS_TITLE_HOVER, null, () -> {
             for (ResourcePackEntry entry : List.copyOf(customSelectedPacks.children())) {
-                if (entry.pack.canBeDisabled()) {
+                if ((this.currentFolderMeta.containsEntry(entry, this.currentFolder) || currentFolder.equals(ROOT_FOLDER)) && entry.pack.canBeDisabled()) {
                     entry.pack.disable();
                 }
             }
@@ -173,10 +173,10 @@ public class FolderedResourcePackScreen extends PackScreen {
 
             // add a ".." entry when not in the root folder
             if (notInRoot()) {
-                var folder = getParentFileSafe(currentFolder);
-                var meta = FolderMeta.loadMetaFile(roots, folder);
-                folders.add(new ResourcePackFolderEntry(client, customAvailablePacks,
-                        this, folder, true, meta));
+                var rootFolder = getParentFileSafe(currentFolder);
+                var meta = FolderMeta.loadMetaFile(roots, currentFolder);
+                folders.add(new ResourcePackFolderEntry(client, customAvailablePacks, customSelectedPacks,
+                        this, currentFolder, rootFolder, true, meta));
             }
 
             // create entries for all the folders that aren't packs
@@ -193,8 +193,8 @@ public class FolderedResourcePackScreen extends PackScreen {
                         }
 
                         var meta = FolderMeta.loadMetaFile(roots, relative);
-                        var entry = new ResourcePackFolderEntry(client, customAvailablePacks,
-                                this, relative, false, meta);
+                        var entry = new ResourcePackFolderEntry(client, customAvailablePacks, customSelectedPacks,
+                                this, relative, null, false, meta);
 
                         if (((FolderPack) entry.pack).isVisible()) {
                             folders.add(entry);

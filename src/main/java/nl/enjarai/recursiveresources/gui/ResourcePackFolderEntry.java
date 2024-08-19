@@ -10,6 +10,7 @@ import net.minecraft.util.Identifier;
 import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.pack.FolderMeta;
 import nl.enjarai.recursiveresources.pack.FolderPack;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,9 +29,12 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
 
     private final FolderedResourcePackScreen ownerScreen;
     public final Path folder;
+    @Nullable
+    public final Path rootFolder;
     public final boolean isUp;
     public final List<ResourcePackEntry> children;
     public final FolderMeta meta;
+    private final PackListWidget selectedList;
 
     private static Function<Path, Path> getIconFileResolver(List<Path> roots, Path folder) {
         return iconPath -> {
@@ -49,9 +53,9 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
         };
     }
 
-    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, FolderedResourcePackScreen ownerScreen, Path folder, boolean isUp, FolderMeta meta) {
+    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget availablePacks, PackListWidget selectedList, FolderedResourcePackScreen ownerScreen, Path folder, @Nullable Path rootFolder, boolean isUp, FolderMeta meta) {
         super(
-                client, list,
+                client, availablePacks,
                 new FolderPack(
                         meta.errored() ? ERRORED_NAME : Text.of(isUp ? UP_TEXT : String.valueOf(folder.getFileName())),
                         isUp ? BACK_DESCRIPTION : meta.errored() ? ERRORED_DESCRIPTION : FOLDER_DESCRIPTION,
@@ -59,22 +63,28 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
                         folder, meta
                 )
         );
+        this.selectedList = selectedList;
         this.ownerScreen = ownerScreen;
         this.folder = folder;
+        this.rootFolder = rootFolder;
         this.isUp = isUp;
         this.meta = meta;
-        this.children = isUp ? List.of() : resolveChildren();
+        this.children = resolveChildren();
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         double relativeMouseX = mouseX - (double) widget.getRowLeft();
-        if (!getChildren().isEmpty() && relativeMouseX <= 32.0D) {
-            enableChildren();
+        if (relativeMouseX <= 32.0D) {
+            if(getChildren().isEmpty()) {
+                disableChildren();
+            } else {
+                enableChildren();
+            }
             return true;
         }
 
-        ownerScreen.moveToFolder(folder);
+        ownerScreen.moveToFolder(this.isUp ? this.rootFolder : this.folder);
         return true;
     }
 
@@ -91,13 +101,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
 
             int relativeMouseX = mouseX - x;
 
-            if (getChildren().size() > 0) {
-                if (relativeMouseX < 32) {
-                    context.drawTexture(WIDGETS_TEXTURE, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
-                } else {
-                    context.drawTexture(WIDGETS_TEXTURE, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
-                }
-            }
+            context.drawTexture(WIDGETS_TEXTURE, x, y, getChildren().isEmpty() ? 32.0F : 0.0F, relativeMouseX < 32 ? 32.0F : 0.0F, 32, 32, 256, 256);
         }
     }
 
@@ -105,6 +109,14 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
         for (ResourcePackEntry entry : getChildren()) {
             if (entry.pack.canBeEnabled()) {
                 entry.pack.enable();
+            }
+        }
+    }
+
+    public void disableChildren() {
+        for (ResourcePackEntry entry : List.copyOf(this.selectedList.children())) {
+            if (this.meta.containsEntry(entry, this.folder) && entry.pack.canBeDisabled()) {
+                entry.pack.disable();
             }
         }
     }

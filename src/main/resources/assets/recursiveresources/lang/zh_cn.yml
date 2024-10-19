@@ -1,0 +1,14 @@
+recursiveresources:
+  sort:
+    a-z: A-Z
+    z-a: Z-A
+  view:
+    folder: 文件夹样式
+    flat: 平铺样式
+  folder:
+    back: (上一级)
+    folder: (文件夹)
+    errored: 载入 folder.json 时出错
+    errored_description: 请确保 json 文件格式正确
+  availablepacks.title.hover: 全部启用
+  selectedpacks.title.hover: 全部禁用

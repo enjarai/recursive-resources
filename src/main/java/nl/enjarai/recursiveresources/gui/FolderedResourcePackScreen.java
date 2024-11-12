@@ -71,6 +71,24 @@ public class FolderedResourcePackScreen extends PackScreen {
 
     @Override
     protected void init() {
+        
+        addDrawableChild(
+            ButtonWidget.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
+                    folderView = !folderView;
+                    btn.setMessage(folderView ? VIEW_FOLDER : VIEW_FLAT);
+                    
+                    refresh();
+                    customAvailablePacks.setScrollAmount(0.0);
+                })
+                .dimensions(ButtonWidget.DEFAULT_WIDTH, ButtonWidget.DEFAULT_HEIGHT, ButtonWidget.DEFAULT_WIDTH, ButtonWidget.DEFAULT_HEIGHT)
+                .build()
+        );
+        
+        searchField = addDrawableChild(new TextFieldWidget(
+            textRenderer, width / 2 - 179, height - 46, 150, 18, searchField, Text.of("")));
+        searchField.setFocusUnlocked(true);
+        searchField.setChangedListener(listProcessor::setFilter);
+        
         super.init();
 
         // Replacing the available pack list with our custom implementation
@@ -103,39 +121,54 @@ public class FolderedResourcePackScreen extends PackScreen {
                 }
             }
         });
-
         selectedPackList = customSelectedPacks;
 
+        listProcessor.pauseCallback();
+        listProcessor.setSorter(currentSorter == null ? (currentSorter = ResourcePackListProcessor.sortAZ) : currentSorter);
+        listProcessor.setFilter(searchField.getText());
+        listProcessor.resumeCallback();
+        
+        this.refreshWidgetPositions();
+    }
+    
+    @Override
+    protected void refreshWidgetPositions() {
+        super.refreshWidgetPositions();
+        
+        this.moveButtons();
+        
+        this.availablePackList.setDimensions(200, layout.getContentHeight() - 20);
+        this.availablePackList.refreshScroll();
+        this.selectedPackList.setDimensions(200, layout.getContentHeight() - 20);
+        this.selectedPackList.refreshScroll();
+    }
+    
+    public void moveButtons() {
+        findButton(OPEN_PACK_FOLDER).ifPresent(btn -> {
+            btn.setX(width / 2 + 35);
+            btn.setY(height - 48);
+        });
+        
         findButton(DONE).ifPresent(btn -> {
+            btn.setX(width / 2 + 35);
+            btn.setY(height - 26);
             if (btn instanceof ButtonWidget button) {
                 button.onPress = btn2 -> applyAndClose();
             }
         });
-
-        /*
-        addDrawableChild(
-                ButtonWidget.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
-                            folderView = !folderView;
-                            btn.setMessage(folderView ? VIEW_FOLDER : VIEW_FLAT);
-
-                            refresh();
-                            customAvailablePacks.setScrollAmount(0.0);
-                        })
-                        .dimensions(ButtonWidget.DEFAULT_WIDTH, ButtonWidget.DEFAULT_HEIGHT, ButtonWidget.DEFAULT_WIDTH, ButtonWidget.DEFAULT_WIDTH)
-                        .build()
-        );
-
-        searchField = addDrawableChild(new TextFieldWidget(
-                textRenderer, width / 2 - 179, height - 46, 154, 16, searchField, Text.of("")));
-        searchField.setFocusUnlocked(true);
-        searchField.setChangedListener(listProcessor::setFilter);
-        addDrawableChild(searchField);
-        */
-
-        listProcessor.pauseCallback();
-        listProcessor.setSorter(currentSorter == null ? (currentSorter = ResourcePackListProcessor.sortAZ) : currentSorter);
-        //listProcessor.setFilter(searchField.getText());
-        listProcessor.resumeCallback();
+        
+        findButton(VIEW_FOLDER).ifPresent(btn -> {
+            btn.setX(width / 2 - 190);
+            btn.setY(height - 26);
+        });
+        
+        findButton(VIEW_FLAT).ifPresent(btn -> {
+            btn.setX(width / 2 - 190);
+            btn.setY(height - 26);
+        });
+        
+        searchField.setX((width / 2 - 190));
+        searchField.setY(height - 46);
     }
 
     private Optional<ClickableWidget> findButton(Text text) {

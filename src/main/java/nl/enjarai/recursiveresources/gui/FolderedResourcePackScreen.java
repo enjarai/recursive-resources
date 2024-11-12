@@ -115,7 +115,7 @@ public class FolderedResourcePackScreen extends PackScreen {
 
         // Also make the selected packs title clickable to unload them
         ((FolderedPackListWidget) customSelectedPacks).recursiveresources$setTitleClickable(SELECTED_PACKS_TITLE_HOVER, null, () -> {
-            for (ResourcePackEntry entry : List.copyOf(customSelectedPacks.children())) {
+            for (ResourcePackEntry entry : Lists.reverse(List.copyOf(customSelectedPacks.children()))) {
                 if ((this.currentFolderMeta.containsEntry(entry, this.currentFolder) || currentFolder.equals(ROOT_FOLDER)) && entry.pack.canBeDisabled()) {
                     entry.pack.disable();
                 }

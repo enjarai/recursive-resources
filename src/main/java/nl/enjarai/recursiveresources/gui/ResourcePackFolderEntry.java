@@ -108,7 +108,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     }
 
     public void enableChildren() {
-        for (ResourcePackEntry entry : getChildren()) {
+        for (ResourcePackEntry entry : Lists.reverse(List.copyOf(getChildren()))) {
             if (entry.pack.canBeEnabled()) {
                 entry.pack.enable();
             }
@@ -116,7 +116,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     }
 
     public void disableChildren() {
-        for (ResourcePackEntry entry : List.copyOf(this.selectedList.children())) {
+        for (ResourcePackEntry entry : Lists.reverse(List.copyOf(this.selectedList.children()))) {
             if (this.meta.containsEntry(entry, this.folder) && entry.pack.canBeDisabled()) {
                 entry.pack.disable();
             }

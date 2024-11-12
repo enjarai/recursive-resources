@@ -1,5 +1,6 @@
 package nl.enjarai.recursiveresources.gui;
 
+import com.google.common.collect.Lists;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
@@ -9,6 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import nl.enjarai.recursiveresources.RecursiveResources;
+import nl.enjarai.recursiveresources.mixin.EntryListWidgetAccessor;
 import nl.enjarai.recursiveresources.pack.FolderMeta;
 import nl.enjarai.recursiveresources.pack.FolderPack;
 
@@ -75,7 +77,9 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
             return true;
         }
 
-        ownerScreen.moveToFolder(folder);
+        if (!((EntryListWidgetAccessor)this.widget).isScrolling()) {
+            ownerScreen.moveToFolder(folder);
+        }
         return true;
     }
 

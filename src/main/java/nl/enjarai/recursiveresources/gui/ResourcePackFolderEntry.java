@@ -103,7 +103,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     }
 
     public void enableChildren() {
-        for (ResourcePackEntry entry : getChildren()) {
+        for (ResourcePackEntry entry : Lists.reverse(List.copyOf(getChildren()))) {
             if (entry.pack.canBeEnabled()) {
                 entry.pack.enable();
             }

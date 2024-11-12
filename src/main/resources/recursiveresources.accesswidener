@@ -8,6 +8,8 @@ accessible  field    net/minecraft/client/gui/screen/pack/PackScreen    selected
 
 accessible  field    net/minecraft/client/gui/screen/Screen    children    Ljava/util/List;
 
+accessible  field    net/minecraft/client/gui/screen/pack/PackScreen    layout    Lnet/minecraft/client/gui/widget/ThreePartsLayoutWidget;
+
 accessible  method   net/minecraft/client/gui/screen/pack/PackScreen    updatePackLists    ()V
 extendable  method   net/minecraft/client/gui/screen/pack/PackScreen    updatePackLists    ()V
 

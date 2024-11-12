@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -93,9 +94,9 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
 
             if (getChildren().size() > 0) {
                 if (relativeMouseX < 32) {
-                    context.drawTexture(WIDGETS_TEXTURE, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
+                    context.drawTexture(RenderLayer::getGuiTextured, WIDGETS_TEXTURE, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
                 } else {
-                    context.drawTexture(WIDGETS_TEXTURE, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
+                    context.drawTexture(RenderLayer::getGuiTextured, WIDGETS_TEXTURE, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
                 }
             }
         }

@@ -5,8 +5,6 @@ import net.minecraft.resource.DirectoryResourcePack;
 import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ZipResourcePack;
 import nl.enjarai.recursiveresources.RecursiveResources;
-import nl.enjarai.recursiveresources.mixin.ZipFileWrapperAccessor;
-import nl.enjarai.recursiveresources.mixin.ZipResourcePackAccessor;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -44,15 +42,20 @@ public class ResourcePackUtils {
     @SuppressWarnings("UnstableApiUsage")
     public static Path determinePackFolder(ResourcePack pack) {
         try {
-            if (pack instanceof DirectoryResourcePack directoryResourcePack) {
-                return directoryResourcePack.root;
-            } else if (pack instanceof ZipResourcePack zipResourcePack) {
-                return ((ZipFileWrapperAccessor) ((ZipResourcePackAccessor) zipResourcePack).getZipFileWrapper()).getFile().toPath();
-            } else if (pack instanceof ModNioResourcePack modResourcePack) {
-                return Path.of(modResourcePack.getId().replaceAll(UNSAFE_PATH_REGEX, "_"));
-            } else {
-                RecursiveResources.LOGGER.warn("Failed to determine source folder for pack: " + pack.getId() + ", unknown pack type: " + pack.getClass().getName());
-                return null;
+            switch (pack) {
+                case DirectoryResourcePack directoryResourcePack -> {
+                    return Path.of(directoryResourcePack.getId().replaceFirst("file",""));
+                }
+                case ZipResourcePack zipResourcePack -> {
+                    return Path.of(zipResourcePack.getId().replaceFirst("file",""));
+                }
+                case ModNioResourcePack modResourcePack -> {
+                    return Path.of(modResourcePack.getId().replaceAll(UNSAFE_PATH_REGEX, "_"));
+                }
+                case null, default -> {
+                    RecursiveResources.LOGGER.warn("Failed to determine source folder for pack: " + pack.getId() + ", unknown pack type: " + pack.getClass().getName());
+                    return null;
+                }
             }
         } catch (Exception e) {
             RecursiveResources.LOGGER.error("Error determining source folder for pack: " + pack.getId(), e);

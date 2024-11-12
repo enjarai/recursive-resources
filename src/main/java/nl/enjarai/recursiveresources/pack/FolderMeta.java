@@ -139,7 +139,7 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
 
             if (fsPath == null) return false;
 
-            pack = EMPTY_PATH.resolve(fsPath.getFileName());
+            pack = fsPath;
         }
 
         Path relativePath = relativiseRelativePath(folder, pack);

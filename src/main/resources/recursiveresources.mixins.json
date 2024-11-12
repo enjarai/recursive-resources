@@ -8,6 +8,7 @@
     "ZipResourcePackAccessor"
   ],
   "client": [
+    "EntryListWidgetAccessor",
     "EntryListWidgetMixin",
     "OptionsScreenMixin",
     "PackListWidgetMixin",

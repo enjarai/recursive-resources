@@ -1,9 +1,11 @@
 package nl.enjarai.recursiveresources.gui;
 
+import com.google.common.collect.Lists;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -84,7 +86,9 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
             return true;
         }
 
-        ownerScreen.moveToFolder(this.isUp ? this.rootFolder : this.folder);
+        if (!this.widget.scrolling) {
+            ownerScreen.moveToFolder(this.isUp ? this.rootFolder : this.folder);
+        }
         return true;
     }
 
@@ -101,12 +105,12 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
 
             int relativeMouseX = mouseX - x;
 
-            context.drawTexture(WIDGETS_TEXTURE, x, y, getChildren().isEmpty() ? 32.0F : 0.0F, relativeMouseX < 32 ? 32.0F : 0.0F, 32, 32, 256, 256);
+            context.drawTexture(RenderLayer::getGuiTextured, WIDGETS_TEXTURE, x, y, getChildren().isEmpty() ? 32.0F : 0.0F, relativeMouseX < 32 ? 32.0F : 0.0F, 32, 32, 256, 256);
         }
     }
 
     public void enableChildren() {
-        for (ResourcePackEntry entry : getChildren()) {
+        for (ResourcePackEntry entry : Lists.reverse(List.copyOf(getChildren()))) {
             if (entry.pack.canBeEnabled()) {
                 entry.pack.enable();
             }
@@ -114,7 +118,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     }
 
     public void disableChildren() {
-        for (ResourcePackEntry entry : List.copyOf(this.selectedList.children())) {
+        for (ResourcePackEntry entry : Lists.reverse(List.copyOf(this.selectedList.children()))) {
             if (this.meta.containsEntry(entry, this.folder) && entry.pack.canBeDisabled()) {
                 entry.pack.disable();
             }

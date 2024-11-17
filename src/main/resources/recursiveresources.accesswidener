@@ -8,6 +8,8 @@ accessible  field    net/minecraft/client/gui/screen/pack/PackScreen    selected
 
 accessible  field    net/minecraft/client/gui/screen/Screen    children    Ljava/util/List;
 
+accessible  field    net/minecraft/client/gui/screen/pack/PackScreen    layout    Lnet/minecraft/client/gui/widget/ThreePartsLayoutWidget;
+
 accessible  method   net/minecraft/client/gui/screen/pack/PackScreen    updatePackLists    ()V
 extendable  method   net/minecraft/client/gui/screen/pack/PackScreen    updatePackLists    ()V
 
@@ -29,6 +31,9 @@ accessible  field    net/minecraft/client/gui/screen/pack/PackListWidget$Resourc
 accessible  field    net/minecraft/client/gui/screen/pack/ResourcePackOrganizer$AbstractPack    profile    Lnet/minecraft/resource/ResourcePackProfile;
 
 accessible  field    net/minecraft/resource/DirectoryResourcePack    root    Ljava/nio/file/Path;
+
+# For scrolling fix
+accessible field net/minecraft/client/gui/widget/EntryListWidget scrolling Z
 
 # NEW!
 accessible  class    net/minecraft/resource/ZipResourcePack$ZipFileWrapper

@@ -1,1 +1,1 @@
-- Added support for 1.21. (Thanks @Oxeus!)
+- Added support for 1.21.3. (Thanks @YoungSoulluoS!)

@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntryListWidget.class)
 public abstract class EntryListWidgetMixin extends ContainerWidget {
@@ -44,12 +43,5 @@ public abstract class EntryListWidgetMixin extends ContainerWidget {
     protected boolean recursiveresources$modifyHeaderRendering(EntryListWidget<?> thiz, DrawContext context, int x, int y,
                                                                @Share("mouseX") LocalIntRef mouseXRef, @Share("mouseY") LocalIntRef mouseYRef) {
         return true;
-    }
-
-    @Inject(
-            method = "clickedHeader",
-            at = @At("HEAD")
-    )
-    protected void recursiveresources$handleHeaderClick(int x, int y, CallbackInfoReturnable<Boolean> cir) {
     }
 }

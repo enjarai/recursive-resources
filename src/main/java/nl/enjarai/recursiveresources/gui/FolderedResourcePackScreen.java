@@ -78,7 +78,7 @@ public class FolderedResourcePackScreen extends PackScreen {
                     btn.setMessage(folderView ? VIEW_FOLDER : VIEW_FLAT);
                     
                     refresh();
-                    customAvailablePacks.setScrollAmount(0.0);
+                    customAvailablePacks.setScrollY(0.0);
                 })
                 .dimensions(ButtonWidget.DEFAULT_WIDTH, ButtonWidget.DEFAULT_HEIGHT, ButtonWidget.DEFAULT_WIDTH, ButtonWidget.DEFAULT_HEIGHT)
                 .build()
@@ -258,14 +258,14 @@ public class FolderedResourcePackScreen extends PackScreen {
             customAvailablePacks.children().addAll(filteredPacks);
         }
 
-        customAvailablePacks.setScrollAmount(customAvailablePacks.getScrollAmount());
+        customAvailablePacks.setScrollY(customAvailablePacks.getScrollY());
     }
 
     public void moveToFolder(Path folder) {
         currentFolder = folder;
         currentFolderMeta = FolderMeta.loadMetaFile(roots, currentFolder);
         refresh();
-        customAvailablePacks.setScrollAmount(0.0);
+        customAvailablePacks.setScrollY(0.0);
     }
 
     // UI Overrides

@@ -33,7 +33,7 @@ accessible  field    net/minecraft/client/gui/screen/pack/ResourcePackOrganizer$
 accessible  field    net/minecraft/resource/DirectoryResourcePack    root    Ljava/nio/file/Path;
 
 # For scrolling fix
-accessible field net/minecraft/client/gui/widget/EntryListWidget scrolling Z
+accessible field net/minecraft/client/gui/widget/ScrollableWidget scrollbarDragged Z
 
 # NEW!
 accessible  class    net/minecraft/resource/ZipResourcePack$ZipFileWrapper

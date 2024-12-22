@@ -3,6 +3,7 @@ package nl.enjarai.recursiveresources.mixin;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.StatsScreen;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackScreen;
 import net.minecraft.client.gui.widget.EntryListWidget;
@@ -14,14 +15,14 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
 @Mixin(PackListWidget.class)
 public abstract class PackListWidgetMixin extends EntryListWidgetMixin implements FolderedPackListWidget {
     @Shadow @Final PackScreen screen;
+    @Shadow public abstract int getRowWidth();
+    
     @Unique
     @Nullable
     private Text titleHoverText;
@@ -71,11 +72,26 @@ public abstract class PackListWidgetMixin extends EntryListWidgetMixin implement
 
         return true;
     }
-
+    
+    /**
+     * Reference
+     * {@link StatsScreen.ItemStatsListWidget#mouseClicked(double, double, int)}
+     * */
+    @SuppressWarnings("all") // Fix Inaccessible for javadocs
     @Override
-    protected void recursiveresources$handleHeaderClick(int x, int y, CallbackInfoReturnable<Boolean> ci) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        boolean bl = super.mouseClicked(mouseX, mouseY, button);
+        return bl || this.clickedHeader(
+            (int) (mouseX - ((double) this.getX() + (double) this.width / 2.0 - (double) this.getRowWidth() / 2.0)),
+            (int) (mouseY - (double) this.getY()) + (int) this.getScrollY() - 4
+        );
+    }
+    
+    @Unique
+    protected boolean clickedHeader(int x, int y) {
         if (titleClickEvent != null && y <= client.textRenderer.fontHeight) {
             titleClickEvent.run();
         }
+        return true;
     }
 }

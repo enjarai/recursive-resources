@@ -86,7 +86,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
             return true;
         }
 
-        if (!this.widget.scrolling) {
+        if (!this.widget.scrollbarDragged) {
             ownerScreen.moveToFolder(this.isUp ? this.rootFolder : this.folder);
         }
         return true;

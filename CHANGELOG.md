@@ -1,1 +1,1 @@
-- Added support for 1.21.3. (Thanks @YoungSoulluoS!)
+- Added support for 1.21.4. (Thanks @YoungSoulluoS!)

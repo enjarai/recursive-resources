@@ -8,7 +8,9 @@ import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackScreen;
 import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Formatting;
+import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.gui.FolderedPackListWidget;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -60,10 +62,10 @@ public abstract class PackListWidgetMixin extends EntryListWidgetMixin implement
             int mouseY = mouseYRef.get();
 
             if (mouseX >= x && mouseX <= x + width && mouseY >= top && mouseY <= bottom) {
-                context.drawText(client.textRenderer, text, left, top, 16777215, false);
+                context.drawText(client.textRenderer, text, left, top, Colors.WHITE, false);
 
                 if (titleTooltip != null) {
-                    screen.setTooltip(List.of(titleTooltip.asOrderedText()));
+                    context.drawTooltip(List.of(titleTooltip.asOrderedText()), mouseX, mouseY);
                 }
 
                 return false;

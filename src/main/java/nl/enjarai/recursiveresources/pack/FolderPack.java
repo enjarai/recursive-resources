@@ -31,7 +31,7 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
                 relativePath = relativePath.toLowerCase().replaceAll("[^a-zA-Z0-9_.-]", "_");
 
                 Identifier id = RecursiveResources.id("textures/gui/custom_folders/" + relativePath + "/" + icon.getFileName());
-                MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(NativeImage.read(stream)));
+                MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(icon.getFileName()::toString, NativeImage.read(stream)));
                 return id;
             } catch (Exception e) {
                 RecursiveResources.LOGGER.warn("Error loading custom folder icon:");

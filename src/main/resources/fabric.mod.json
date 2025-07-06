@@ -33,9 +33,9 @@
   "accessWidener": "recursiveresources.accesswidener",
 
   "depends": {
-    "minecraft": ">=1.21.2",
+    "minecraft": ">=1.21.6",
     "fabric-api": "*",
-    "cicada": ">=0.8.0 <1.0.0",
+    "cicada": ">=0.13.0 <1.0.0",
     "fabricloader": ">=0.15"
   },
 

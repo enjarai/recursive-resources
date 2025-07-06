@@ -1,1 +1,1 @@
--  Added support for overlay type resource packs. (Thanks @ImBonana!)
+-  Updated to 1.21.6-7. (Thanks @ImBonana!)

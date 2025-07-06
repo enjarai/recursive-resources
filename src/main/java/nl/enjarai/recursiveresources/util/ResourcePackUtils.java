@@ -2,9 +2,11 @@ package nl.enjarai.recursiveresources.util;
 
 import net.fabricmc.fabric.impl.resource.loader.ModNioResourcePack;
 import net.minecraft.resource.DirectoryResourcePack;
+import net.minecraft.resource.OverlayResourcePack;
 import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ZipResourcePack;
 import nl.enjarai.recursiveresources.RecursiveResources;
+import nl.enjarai.recursiveresources.mixin.OverlayResourcePackAccessor;
 import nl.enjarai.recursiveresources.mixin.ZipFileWrapperAccessor;
 import nl.enjarai.recursiveresources.mixin.ZipResourcePackAccessor;
 
@@ -50,6 +52,8 @@ public class ResourcePackUtils {
                 return ((ZipFileWrapperAccessor) ((ZipResourcePackAccessor) zipResourcePack).getZipFileWrapper()).getFile().toPath();
             } else if (pack instanceof ModNioResourcePack modResourcePack) {
                 return Path.of(modResourcePack.getId().replaceAll(UNSAFE_PATH_REGEX, "_"));
+            } else if (pack instanceof OverlayResourcePack overlayResourcePack) {
+                return determinePackFolder(((OverlayResourcePackAccessor) overlayResourcePack).getOverlaysAndBase().getFirst());
             } else {
                 RecursiveResources.LOGGER.warn("Failed to determine source folder for pack: " + pack.getId() + ", unknown pack type: " + pack.getClass().getName());
                 return null;

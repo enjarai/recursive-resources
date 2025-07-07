@@ -1,1 +1,1 @@
--  Updated to 1.21.6-7. (Thanks @ImBonana!)
+-  Fix a crash in production. (Thanks @jacg311!)

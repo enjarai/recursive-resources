@@ -12,9 +12,9 @@ public abstract class FileResourcePackProviderMixin {
             method = "forEachProfile",
             at = @At(
                     value = "INVOKE",
-                    target = "Lorg/slf4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;)V"
-            ),
-            remap = false
+                    target = "Lorg/slf4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;)V",
+                    remap = false
+            )
     )
     private static void recursiveresources$skipUnnessecaryLogging(Logger instance, String s, Object o) {
         // Don't log anything
